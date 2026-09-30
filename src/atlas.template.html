@@ -177,16 +177,17 @@ table.t tr.miss td{color:var(--ink-3)}
 
 <div class="app">
   <div class="rail" role="toolbar" aria-label="Workspace tools">
-    <div class="brand"><b>Anakalang Uma Atlas</b><span>8 houses · 3 suku · Kampung Marapu</span></div>
-    <div class="grp"><span class="lab">Lens</span>
+    <div class="brand"><b>Anakalang Uma Atlas</b><span id="brandSub">8 houses · 3 suku · Kampung Marapu</span></div>
+    <div class="grp"><span class="lab" id="lensLab">Lens</span>
       <div class="seg" id="lens" role="group" aria-label="Colour lens"></div></div>
-    <div class="grp"><span class="lab">Go to</span>
+    <div class="grp"><span class="lab" id="gotoLab">Go to</span>
       <select class="btn" id="goto" aria-label="Jump to board"></select></div>
     <button class="btn" id="isoBtn" aria-pressed="false" title="Hide everything except the selection (I)">Isolate</button>
     <button class="btn" id="clearBtn" title="Clear selection (Esc)">Clear</button>
     <div class="spacer"></div>
     <button class="btn" id="noteBtn" title="Add a sticky note at the centre of the view (N)">+ Note</button>
     <button class="btn" id="panelBtn" aria-pressed="true">Inspector</button>
+    <div class="seg" id="langSeg" role="group" aria-label="Language / Bahasa"><button data-lang="id">ID</button><button data-lang="en">EN</button></div>
     <button class="btn" id="themeBtn" title="Switch light / dark">◐</button>
   </div>
   <div class="stage" id="stage">
@@ -226,7 +227,12 @@ const st = {
 const $ = s => document.querySelector(s);
 const el = (tag, attrs={}, parent) => { const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; };
 const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const T = t => TYPES[t] || {name:t, gloss:"", group:"unknown", zone:"semi", gender:"none", sacred:0};
+st.lang = store.get("lang", "id");
+const tr = (en, id) => st.lang==="id" ? id : en;
+const lc = (o, k) => o ? ((st.lang==="id" && o[k+"_id"]!==undefined) ? o[k+"_id"] : o[k]) : "";
+const T = t => { const b=TYPES[t]; if(!b) return {name:t, gloss:"", group:"unknown", zone:"semi", gender:"none", sacred:0};
+  return {...b, name:lc(b,"name"), gloss:lc(b,"gloss"), note:lc(b,"note")}; };
+const gl = (dict,v) => lc(META[dict][v],"label");
 const attr = (t,k) => (st.cb[t] && st.cb[t][k]!==undefined) ? st.cb[t][k] : T(t)[k];
 
 /* ---------- geometry ---------- */
@@ -278,12 +284,12 @@ function labelType(s){ const u=s.toUpperCase().trim();
 
 /* ---------- lenses ---------- */
 const LENSES = {
-  group:  {label:"Function", key:"group", vals:Object.keys(META.groups), name:v=>META.groups[v].label, color:v=>`var(--g-${v})`},
-  zone:   {label:"Zone", key:"zone", vals:Object.keys(META.zones), name:v=>META.zones[v].label, color:v=>`var(--z-${v})`, hint:"Public / semi-public / private, after the paper's Gambar 3."},
-  gender: {label:"Gender", key:"gender", vals:Object.keys(META.genders), name:v=>META.genders[v].label, color:v=>`var(--x-${v})`, hint:"Men's representation vs women's work zones, as the paper codes them."},
-  sacred: {label:"Sacred", key:"sacred", vals:[0,1,2,3], name:v=>["0 · profane","1 · social-ritual","2 · protective","3 · Marapu / ancestral"][v], color:v=>`var(--s${v})`, hint:"Interpretive 0–3 coding from the paper's text. Edit it in the Codebook."},
-  depth:  {label:"Depth", room:r=>r.depth, vals:[0,1,2,3,4,5,6], name:v=>"depth "+v, color:v=>`var(--d${Math.min(6,v)})`, hint:"Steps from Baga Haga Uma through doors (detected in the drawings) and open bale-bale floors."},
-  ring:   {label:"Ring", room:r=>r.ring, vals:[0,1,2,3], name:v=>["centre bay","inner ring","outer ring","annex"][v], color:v=>`var(--r${v})`, hint:"Derived: concentric rings of the 5 × 5 column square around the four main pillars."}
+  group:  {get label(){return tr("Function","Fungsi")}, key:"group", vals:Object.keys(META.groups), name:v=>gl("groups",v), color:v=>`var(--g-${v})`},
+  zone:   {get label(){return tr("Zone","Zona")}, key:"zone", vals:Object.keys(META.zones), name:v=>gl("zones",v), color:v=>`var(--z-${v})`, get hint(){return tr("Public / semi-public / private, after the paper's Gambar 3.","Publik / semi-publik / privat, mengikuti Gambar 3 pada paper.")}},
+  gender: {get label(){return tr("Gender","Gender")}, key:"gender", vals:Object.keys(META.genders), name:v=>gl("genders",v), color:v=>`var(--x-${v})`, get hint(){return tr("Men's representation vs women's work zones, as the paper codes them.","Zona representasi laki-laki vs zona kerja perempuan, sesuai pengodean paper.")}},
+  sacred: {get label(){return tr("Sacred","Sakral")}, key:"sacred", vals:[0,1,2,3], name:v=>(st.lang==="id"?["0 · profan","1 · sosial-ritual","2 · pelindung","3 · Marapu / leluhur"]:["0 · profane","1 · social-ritual","2 · protective","3 · Marapu / ancestral"])[v], color:v=>`var(--s${v})`, get hint(){return tr("Interpretive 0–3 coding from the paper's text. Edit it in the Codebook.","Pengodean interpretatif 0–3 dari teks paper. Ubah di Buku Kode.")}},
+  depth:  {get label(){return tr("Depth","Kedalaman")}, room:r=>r.depth, vals:[0,1,2,3,4,5,6], name:v=>tr("depth ","kedalaman ")+v, color:v=>`var(--d${Math.min(6,v)})`, get hint(){return tr("Steps from Baga Haga Uma through doors (detected in the drawings) and open bale-bale floors.","Jumlah langkah dari Baga Haga Uma melalui pintu (terdeteksi di gambar) dan lantai bale-bale yang terbuka.")}},
+  ring:   {get label(){return tr("Ring","Cincin")}, room:r=>r.ring, vals:[0,1,2,3], name:v=>(st.lang==="id"?["bentang tengah","cincin dalam","cincin luar","bangunan tambahan"]:["centre bay","inner ring","outer ring","annex"])[v], color:v=>`var(--r${v})`, get hint(){return tr("Derived: concentric rings of the 5 × 5 column square around the four main pillars.","Turunan: cincin konsentris pada bujur sangkar kolom 5 × 5 di sekitar empat tiang utama.")}}
 };
 function roomVal(r){ const L=LENSES[st.lens]; return L.room? L.room(r) : attr(r.type, L.key); }
 function roomColor(r){ const v=roomVal(r); return v==null ? "var(--g-unknown)" : LENSES[st.lens].color(v); }
@@ -364,8 +370,8 @@ function renderSel(){
 const tip=$("#tip");
 function showTip(e,html){ const r=stage.getBoundingClientRect(); tip.innerHTML=html; tip.hidden=false; tip.style.left=(e.clientX-r.left)+"px"; tip.style.top=(e.clientY-r.top)+"px"; }
 function hideTip(){ tip.hidden=true; }
-function roomTip(r){ const t=T(r.type); const ev=D.plans[r.house].elev; const e=ev&&ev[r.type]!==undefined? ` · floor ${ev[r.type]>=0?"+":""}${ev[r.type].toFixed(2)}`:"";
-  return `<b>${esc(t.name)}</b> · ${esc(t.gloss)}<br><span class="m">${esc(H[r.house].meta.name)} · depth ${r.depth??"–"} · ${r.area.toFixed(2)} mod² · ring ${r.ring}${e}</span>`; }
+function roomTip(r){ const t=T(r.type); const ev=D.plans[r.house].elev; const e=ev&&ev[r.type]!==undefined? ` · ${tr("floor","lantai")} ${ev[r.type]>=0?"+":""}${ev[r.type].toFixed(2)}`:"";
+  return `<b>${esc(t.name)}</b> · ${esc(t.gloss)}<br><span class="m">${esc(H[r.house].meta.name)} · ${tr("depth","kedalaman")} ${r.depth??"–"} · ${r.area.toFixed(2)} mod² · ${tr("ring","cincin")} ${r.ring}${e}</span>`; }
 function bindRoom(node,r){
   node.addEventListener("pointerenter",e=>showTip(e,roomTip(r)));
   node.addEventListener("pointermove",e=>showTip(e,roomTip(r)));
@@ -417,19 +423,19 @@ function rowTitle(txt,sub,x,y){ const t=el("text",{class:"row-title",x,y},vp); t
 
 function build(){
   vp.innerHTML=""; boards.length=0;
-  rowTitle("Horizontal · Lantai 1 (Padua Uma)","Ground floor plans traced from Tabel 2, normalised to the column module. Front terrace at the bottom in every house.",0,-60);
+  rowTitle(tr("Horizontal · Lantai 1 (Padua Uma)","Horizontal · Lantai 1 (Padua Uma)"),tr("Ground floor plans traced from Tabel 2, normalised to the column module. Front terrace at the bottom in every house.","Denah lantai 1 dijiplak dari Tabel 2, dinormalisasi ke modul kolom. Teras depan berada di bawah pada setiap rumah."),0,-60);
   HOUSES.forEach((h,i)=>{
-    const b=board("plan-"+h.key,h.name+(h.alt?" · "+h.alt:""),`${H[h.key].rooms.length} spaces · drawn bay ≈ ${D.plans[h.key].bay} pt · mean depth ${H[h.key].meanDepth.toFixed(2)}`,colX(i),ROW_A,CW,CH,{tag:"Suku "+h.suku});
+    const b=board("plan-"+h.key,h.name+(h.alt?" · "+h.alt:""),tr(`${H[h.key].rooms.length} spaces · drawn bay ≈ ${D.plans[h.key].bay} pt · mean depth ${H[h.key].meanDepth.toFixed(2)}`,`${H[h.key].rooms.length} ruang · bentang gambar ≈ ${D.plans[h.key].bay} pt · kedalaman rata-rata ${H[h.key].meanDepth.toFixed(2).replace(".",",")}`),colX(i),ROW_A,CW,CH,{tag:"Suku "+h.suku});
     drawPlan(b.g,h.key,18-PB.x0*S,78-PB.y0*S);
-    const cap=el("text",{class:"board-cap",x:18,y:CH-14},b.g); cap.textContent=h.roof+" · "+h.floor;
+    const cap=el("text",{class:"board-cap",x:18,y:CH-14},b.g); cap.textContent=lc(h,"roof")+" · "+lc(h,"floor");
   });
-  rowTitle("Vertical · three worlds","Exploded stack per house: Lubu Penang (below), Padua Uma (human), Hedang → Umadalu → Jaga Wogu (ancestors). Upper plans aligned on the four main pillars.",0,ROW_B-60);
+  rowTitle(tr("Vertical · three worlds","Vertikal · tiga dunia"),tr("Exploded stack per house: Lubu Penang (below), Padua Uma (human), Hedang → Umadalu → Jaga Wogu (ancestors). Upper plans aligned on the four main pillars.","Susunan terurai per rumah: Lubu Penang (bawah), Padua Uma (manusia), Hedang → Umadalu → Jaga Wogu (leluhur). Denah atas diselaraskan pada empat tiang utama."),0,ROW_B-60);
   HOUSES.forEach((h,i)=>drawStack(h,colX(i),ROW_B));
-  rowTitle("Access graphs","Justified graphs rooted at Baga Haga Uma. Solid = door found in the drawing, dashed = open floor or open terrace.",0,ROW_C-60);
+  rowTitle(tr("Access graphs","Graf akses"),tr("Justified graphs rooted at Baga Haga Uma. Solid = door found in the drawing, dashed = open floor or open terrace.","Graf terjustifikasi berakar di Baga Haga Uma. Garis penuh = pintu pada gambar, putus-putus = lantai atau teras terbuka."),0,ROW_C-60);
   HOUSES.forEach((h,i)=>drawGraph(h,colX(i),ROW_C));
   // analysis column on the left
   const AX=-1620;
-  rowTitle("Cross-reading","Boards that compare all eight houses at once.",AX,-60);
+  rowTitle(tr("Cross-reading","Pembacaan silang"),tr("Boards that compare all eight houses at once.","Papan yang membandingkan kedelapan rumah sekaligus."),AX,-60);
   drawConsensusBoard(AX,ROW_A);
   drawOverlayBoard(AX+800,ROW_A);
   drawMatrixBoard(AX,ROW_B+40);
@@ -442,13 +448,13 @@ function build(){
 /* ---------- vertical stack (axonometric) ---------- */
 const ISO_K=S*.6, C30=Math.cos(Math.PI/6), S30=.5;
 const iso=(x,y)=>[(x-y)*C30*ISO_K,(x+y)*S30*ISO_K];
-const LV=[{z:0,key:"lubu",name:"Lubu Penang",sub:"Level 1 · alam bawah · livestock, timber, firewood",c:"--lv0"},
-          {z:130,key:"padua",name:"Padua Uma",sub:"Level 2 · alam tengah · human world",c:"--lv1"},
-          {z:300,key:"rak1",name:"Hedang",sub:"Level 3a · rack · utensils, ready food",c:"--lv2"},
-          {z:420,key:"rak2",name:"Umadalu",sub:"Level 3b · loft · personal goods, gong, mats",c:"--lv3"},
-          {z:540,key:"jaga",name:"Umadalu Jaga Wogu",sub:"Level 3c · alam atas · heirlooms, seed grain",c:"--lv4"}];
+const LV=[{z:0,key:"lubu",name:"Lubu Penang",sub:["Level 1 · alam bawah","Level 1 · alam bawah"],c:"--lv0"},
+          {z:130,key:"padua",name:"Padua Uma",sub:["Level 2 · alam tengah","Level 2 · alam tengah"],c:"--lv1"},
+          {z:300,key:"rak1",name:"Hedang",sub:["Level 3a · rack","Level 3a · rak"],c:"--lv2"},
+          {z:420,key:"rak2",name:"Umadalu",sub:["Level 3b · loft","Level 3b · loteng"],c:"--lv3"},
+          {z:540,key:"jaga",name:"Umadalu Jaga Wogu",sub:["Level 3c · alam atas","Level 3c · alam atas"],c:"--lv4"}];
 function drawStack(h,x,y){
-  const b=board("stack-"+h.key,h.name,h.roof,x,y,CW,VS_H,{tag:"Suku "+h.suku});
+  const b=board("stack-"+h.key,h.name,lc(h,"roof"),x,y,CW,VS_H,{tag:"Suku "+h.suku});
   const ox=CW/2+30, base=VS_H-150;
   const g=el("g",{transform:`translate(${ox},${base})`},b.g);
   const M=`matrix(${C30*ISO_K},${S30*ISO_K},${-C30*ISO_K},${S30*ISO_K},0,0)`;
@@ -469,25 +475,26 @@ function drawStack(h,x,y){
         u.labels.forEach(lb=>{ const t=labelType(lb.t); if(!t) return; const [sx,sy]=iso(lb.x,lb.y); const c=el("g",{class:"chip-u sel-able","data-type":t,transform:`translate(${sx},${sy})`},lg);
           const w=T(t).name.length*5.1+12; el("rect",{x:-w/2,y:-9,width:w,height:16,rx:8,style:`fill:var(${L.c})`},c); const tx=el("text",{x:0,y:3,"text-anchor":"middle"},c); tx.textContent=T(t).name;
           c.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); setSel([t],e.shiftKey||e.metaKey); setTab("inspect"); });
-          c.addEventListener("pointerenter",e=>showTip(e,`<b>${esc(T(t).name)}</b> · ${esc(T(t).gloss)}<br><span class="m">${esc(h.name)} · drawn label “${esc(lb.t)}”${lb.t.match(/[+-]\d/)?"":""}</span>`)); c.addEventListener("pointerleave",hideTip); });
+          c.addEventListener("pointerenter",e=>showTip(e,`<b>${esc(T(t).name)}</b> · ${esc(T(t).gloss)}<br><span class="m">${esc(h.name)} · ${tr("drawn label","label gambar")} “${esc(lb.t)}”</span>`)); c.addEventListener("pointerleave",hideTip); });
     } }
     // level label at left
     const ly=-10; const tl=el("text",{class:"lvl-label",x:-CW/2+30,y:ly-L.z+4},g); tl.textContent=L.name;
-    const ts=el("text",{class:"lvl-sub",x:-CW/2+30,y:ly-L.z+18},g); ts.textContent=L.sub.split(" · ")[0]+" · "+L.sub.split(" · ")[1];
+    const ts=el("text",{class:"lvl-sub",x:-CW/2+30,y:ly-L.z+18},g); ts.textContent=tr(L.sub[0],L.sub[1]);
     if(li<LV.length-1) drawPillars(L.z, (LV[li+1].key==="jaga"&&!hasJ)? L.z+60 : LV[li+1].z, "pillar");
   });
-  if(!hasJ){ const t0=el("text",{class:"lvl-label",x:-CW/2+30,y:-10-LV[4].z+4,style:"fill:var(--ink-3)"},g); t0.textContent="Umadalu Jaga Wogu"; const t=el("text",{class:"lvl-sub",x:-CW/2+30,y:-10-LV[4].z+18},g); t.textContent="No Jaga Wogu: hipped roof, no tower"; }
-  if(h.key==="kedabura"){ const t=el("text",{class:"lvl-sub",x:-CW/2+30,y:-LV[4].z-50},g); t.textContent="Drawn elevations: Hedang +2.00 · Umadalu +2.60 · Jaga Wogu +3.00"; }
+  if(!hasJ){ const t0=el("text",{class:"lvl-label",x:-CW/2+30,y:-10-LV[4].z+4,style:"fill:var(--ink-3)"},g); t0.textContent="Umadalu Jaga Wogu"; const t=el("text",{class:"lvl-sub",x:-CW/2+30,y:-10-LV[4].z+18},g); t.textContent=tr("No Jaga Wogu: hipped roof, no tower","Tanpa Jaga Wogu: atap perisai, tanpa menara"); }
+  if(h.key==="kedabura"){ const t=el("text",{class:"lvl-sub",x:-CW/2+30,y:-LV[4].z-50},g); t.textContent=tr("Drawn elevations: Hedang +2.00 · Umadalu +2.60 · Jaga Wogu +3.00","Peil pada gambar: Hedang +2,00 · Umadalu +2,60 · Jaga Wogu +3,00"); }
 }
 
 /* ---------- justified graph ---------- */
 function drawGraph(h,x,y){
-  const hk=H[h.key]; const b=board("graph-"+h.key,h.name,`mean depth ${hk.meanDepth.toFixed(2)} · max ${Math.max(...hk.rooms.map(r=>r.depth||0))}`,x,y,CW,GR_H,{tag:"Access graph"});
+  const hk=H[h.key]; const b=board("graph-"+h.key,h.name,tr(`mean depth ${hk.meanDepth.toFixed(2)} · max ${Math.max(...hk.rooms.map(r=>r.depth||0))}`,`kedalaman rata-rata ${hk.meanDepth.toFixed(2).replace(".",",")} · maks ${Math.max(...hk.rooms.map(r=>r.depth||0))}`),x,y,CW,GR_H,{tag:tr("Access graph","Graf akses")});
   const g=el("g",{transform:`translate(0,90)`},b.g);
-  const maxD=Math.max(...hk.rooms.map(r=>r.depth||0)); const rowH=Math.min(46,(GR_H-120)/Math.max(1,maxD));
-  const byD={}; hk.rooms.forEach((r,i)=>{ (byD[r.depth]=byD[r.depth]||[]).push(i); });
+  const reach=Math.max(...hk.rooms.map(r=>r.depth||0)); const orphan=hk.rooms.some(r=>r.depth==null); const maxD=reach+(orphan?1:0);
+  const rowH=Math.min(46,(GR_H-120)/Math.max(1,maxD)); const dOf=r=>r.depth==null? maxD : r.depth;
+  const byD={}; hk.rooms.forEach((r,i)=>{ (byD[dOf(r)]=byD[dOf(r)]||[]).push(i); });
   const pos={}; for(const d in byD){ const arr=byD[d].sort((a,b)=>hk.rooms[a].anchor[0]-hk.rooms[b].anchor[0]); arr.forEach((i,k)=>{ pos[i]=[40+(CW-80)*(k+.5)/arr.length, d*rowH]; }); }
-  for(let d=0; d<=maxD; d++){ el("line",{class:"gline",x1:20,y1:d*rowH,x2:CW-20,y2:d*rowH},g); const t=el("text",{class:"dlabel",x:22,y:d*rowH-4},g); t.textContent=d; }
+  for(let d=0; d<=maxD; d++){ el("line",{class:"gline",x1:20,y1:d*rowH,x2:CW-20,y2:d*rowH},g); const t=el("text",{class:"dlabel",x:22,y:d*rowH-4},g); t.textContent= orphan&&d===maxD? tr("unreached","tak terjangkau") : d; }
   hk.P.links.forEach(l=>{ if(l.kind==="wall") return; const a=pos[l.a],c=pos[l.b]; el("line",{class:l.kind==="door"?"link-door":"link-open",x1:a[0],y1:a[1],x2:c[0],y2:c[1]},g); });
   hk.rooms.forEach((r,i)=>{ const [px,py]=pos[i]; const n=el("circle",{class:"node sel-able",cx:px,cy:py,r:7,"data-type":r.type},g); n.__room=r; bindRoom(n,r);
     const t=el("text",{class:"nlabel",x:px,y:py+17},g); t.textContent=T(r.type).name.replace("Korung ","K. "); });
@@ -495,8 +502,8 @@ function drawGraph(h,x,y){
 
 /* ---------- consensus board ---------- */
 let consG=null, consB=null;
-function drawConsensusBoard(x,y){ consB=board("consensus","Module consensus","Dominant space in each structural cell, across 8 houses",x,y,760,CH,{tag:"Derived"}); consG=el("g",{transform:"translate(40,96)"},consB.g);
-  const c=el("text",{class:"board-cap",x:18,y:CH-14},consB.g); c.textContent="Click a cell to highlight that position in every plan. Dots = the 8 houses, in row order."; }
+function drawConsensusBoard(x,y){ consB=board("consensus",tr("Module consensus","Konsensus modul"),tr("Dominant space in each structural cell, across 8 houses","Ruang dominan di tiap sel struktur, dari 8 rumah"),x,y,760,CH,{tag:tr("Derived","Turunan")}); consG=el("g",{transform:"translate(40,96)"},consB.g);
+  const c=el("text",{class:"board-cap",x:18,y:CH-14},consB.g); c.textContent=tr("Click a cell to highlight that position in every plan. Dots = the 8 houses, in row order.","Klik sel untuk menyorot posisi itu di semua denah. Titik = 8 rumah, sesuai urutan baris."); }
 function drawConsensus(){ if(!consG) return; consG.innerHTML="";
   const U=52, ox=3*U, oy=3*U;   // cells -3..5
   for(let i=-3;i<=5;i++) for(let j=-3;j<=5;j++){
@@ -511,7 +518,7 @@ function drawConsensus(){ if(!consG) return; consG.innerHTML="";
     else col=LENSES[st.lens].color(attr(bt,LENSES[st.lens].key));
     const r=el("rect",{class:"cell sel-able",x:X,y:Y,width:W,height:Hh,"data-type":bt,style:`fill:${col};fill-opacity:${.25+.75*bv/8}`},consG);
     r.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); st.sel.clear(); st.cell = st.cell===key? null : key; renderSel(); setTab("inspect"); });
-    r.addEventListener("pointerenter",e=>showTip(e,`<b>Cell ${i},${j}</b> · ring ${ringOf(i,j)}<br>`+Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`${esc(T(t).name)} <span class="m">${n}/8</span>`).join("<br>")));
+    r.addEventListener("pointerenter",e=>showTip(e,`<b>${tr("Cell","Sel")} ${i},${j}</b> · ${tr("ring","cincin")} ${ringOf(i,j)}<br>`+Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`${esc(T(t).name)} <span class="m">${n}/8</span>`).join("<br>")));
     r.addEventListener("pointerleave",hideTip);
     const tt=el("text",{class:"cell-t",x:X+W/2,y:Y+Hh/2-4},consG); const nm=T(bt).name.replace("Korung ","K. ").replace("Baga ","B. ").replace("Kapenang ","Kap. "); tt.textContent=nm.length>11&&W<60? nm.slice(0,10)+"…":nm;
     const tn=el("text",{class:"cell-n",x:X+W/2,y:Y+Hh/2+9},consG); tn.textContent=bv+"/8";
@@ -519,36 +526,36 @@ function drawConsensus(){ if(!consG) return; consG.innerHTML="";
   }
   // pillar markers
   [[2,2],[3.2,2],[2,3.2],[3.2,3.2]].forEach(([a,b])=>el("circle",{cx:ox+a*U,cy:oy+b*U,r:5,style:"fill:var(--accent)"},consG));
-  const lab=el("text",{class:"board-sub",x:ox+2.6*U,y:oy+5.2*U+22,"text-anchor":"middle"},consG); lab.textContent="▲ front (Baga Haga Uma)";
+  const lab=el("text",{class:"board-sub",x:ox+2.6*U,y:oy+5.2*U+22,"text-anchor":"middle"},consG); lab.textContent=tr("▲ front (Baga Haga Uma)","▲ depan (Baga Haga Uma)");
 }
 
 /* ---------- overlay board ---------- */
-function drawOverlayBoard(x,y){ const b=board("overlay","Superimposed plans","All 8 plans stacked on the same module grid",x,y,CW+120,CH,{tag:"Derived"});
+function drawOverlayBoard(x,y){ const b=board("overlay",tr("Superimposed plans","Denah bertumpuk"),tr("All 8 plans stacked on the same module grid","Kedelapan denah ditumpuk pada grid modul yang sama"),x,y,CW+120,CH,{tag:tr("Derived","Turunan")});
   const g=el("g",{transform:`translate(${78-PB.x0*S},${78-PB.y0*S}) scale(${S})`},b.g);
   HOUSES.forEach(h=>H[h.key].rooms.forEach(r=>{ const p=el("path",{class:"room ovl sel-able",d:"M"+r.poly.map(q=>q.join(" ")).join("L")+"Z","data-type":r.type,"data-cells":cellList(r),style:"fill-opacity:.14;stroke-opacity:.25"},g); p.__room=r; bindRoom(p,r); }));
   CL.forEach(v=>{ el("line",{class:"modgrid",x1:v,y1:-.3,x2:v,y2:5.5},g); el("line",{class:"modgrid",x1:-.3,y1:v,x2:5.5,y2:v},g); });
   [[2,2],[3.2,2],[2,3.2],[3.2,3.2]].forEach(([a,c])=>el("circle",{class:"col main",cx:a,cy:c,r:.07},g));
-  const c=el("text",{class:"board-cap",x:18,y:CH-14},b.g); c.textContent="Overlap builds colour: dense tone = the same kind of space at the same place in many houses.";
+  const c=el("text",{class:"board-cap",x:18,y:CH-14},b.g); c.textContent=tr("Overlap builds colour: dense tone = the same kind of space at the same place in many houses.","Tumpukan membentuk warna: warna pekat = jenis ruang yang sama di posisi yang sama pada banyak rumah.");
 }
 
 /* ---------- vertical matrix ---------- */
 function drawMatrixBoard(x,y){
-  const rows=[["Lubu Penang","kolong · level 1",h=>true],["Padua Uma floor","level 2",h=>true],
-    ["Hedang","rack level 1",h=>H[h].utypes.has("hedang")],["Hedang Korung","rack over rooms",h=>H[h].utypes.has("hedang_korung")],
-    ["Umadalu Korung","loft level 2",h=>H[h].utypes.has("umadalu_korung")],["Umadalu Padua Uma","loft over core",h=>H[h].utypes.has("umadalu_padua_uma")],
-    ["Umadalu Jaga Wogu","tower attic · level 3",h=>H[h].utypes.has("umadalu_jaga_wogu")],
-    ["Centre-bay use","what sits between the 4 pillars",null],["Kitchen position","",null],["Anakajaka count","",null]];
+  const rows=[["Lubu Penang",tr("kolong · level 1","kolong · level 1"),h=>true],[tr("Padua Uma floor","Lantai Padua Uma"),"level 2",h=>true],
+    ["Hedang",tr("rack level 1","rak level 1"),h=>H[h].utypes.has("hedang")],["Hedang Korung",tr("rack over rooms","rak di atas kamar"),h=>H[h].utypes.has("hedang_korung")],
+    ["Umadalu Korung",tr("loft level 2","loteng level 2"),h=>H[h].utypes.has("umadalu_korung")],["Umadalu Padua Uma",tr("loft over core","loteng di atas inti"),h=>H[h].utypes.has("umadalu_padua_uma")],
+    ["Umadalu Jaga Wogu",tr("tower attic · level 3","loteng menara · level 3"),h=>H[h].utypes.has("umadalu_jaga_wogu")],
+    [tr("Centre-bay use","Fungsi bentang tengah"),tr("what sits between the 4 pillars","apa yang ada di antara 4 tiang utama"),null],[tr("Kitchen position","Posisi dapur"),"",null],[tr("Anakajaka count","Jumlah Anakajaka"),"",null]];
   const W=1520, rh=40, top=110, lw=260, cw=(W-lw-40)/8;
-  const b=board("vmatrix","Vertical & structural matrix","Presence read from the upper-level drawings (Tabel 2) and ground plans",x,y,W,top+rows.length*rh+50,{tag:"Derived"});
+  const b=board("vmatrix",tr("Vertical & structural matrix","Matriks vertikal & struktur"),tr("Presence read from the upper-level drawings (Tabel 2) and ground plans","Keberadaan dibaca dari gambar level atas (Tabel 2) dan denah lantai 1"),x,y,W,top+rows.length*rh+50,{tag:tr("Derived","Turunan")});
   HOUSES.forEach((h,k)=>{ const t=el("text",{class:"mtx-h",x:lw+cw*(k+.5),y:top-16},b.g); t.textContent=h.name; const s=el("text",{class:"mtx-rs",x:lw+cw*(k+.5),y:top-4,"text-anchor":"middle"},b.g); s.textContent=h.suku; });
   rows.forEach((r,ri)=>{ const yy=top+ri*rh; el("line",{class:"gline",x1:18,y1:yy,x2:W-18,y2:yy},b.g);
     const t=el("text",{class:"mtx-r",x:18,y:yy+18},b.g); t.textContent=r[0]; const s=el("text",{class:"mtx-rs",x:18,y:yy+31},b.g); s.textContent=r[1];
     HOUSES.forEach((h,k)=>{ const cx=lw+cw*(k+.5), cy=yy+rh/2;
       if(r[2]){ const on=r[2](h.key); const lvc=ri<2?`var(--lv${ri})`:ri>=6?"var(--lv4)":"var(--lv2)";
         el("rect",{x:cx-cw/2+6,y:yy+6,width:cw-12,height:rh-12,rx:5,style:on?`fill:${lvc}`:"fill:none;stroke:var(--rule);stroke-dasharray:3 3"},b.g);
-        const tt=el("text",{class:"cell-n",x:cx,y:cy+4},b.g); tt.textContent=on?"present":"—"; }
+        const tt=el("text",{class:"cell-n",x:cx,y:cy+4},b.g); tt.textContent=on?tr("present","ada"):"—"; }
       else { let v=""; const hk=H[h.key];
-        if(ri===7){ v=T(hk.cellType["2,2"]).name; } if(ri===8){ v= hk.rooms.some(q=>q.type==="kapenang_karabuk")?"centre (hearth)": hk.rooms.some(q=>q.type==="dapur")?"inside, rear-left":"separate annex"; }
+        if(ri===7){ v=T(hk.cellType["2,2"]).name; } if(ri===8){ v= hk.rooms.some(q=>q.type==="kapenang_karabuk")?tr("centre (hearth)","tengah (tungku)"): hk.rooms.some(q=>q.type==="dapur")?tr("inside, rear-left","di dalam, kiri belakang"):tr("separate annex","bangunan terpisah"); }
         if(ri===9){ v=hk.rooms.filter(q=>q.type==="ana_kajaka").length+""; }
         const tt=el("text",{class:"cell-t",x:cx,y:cy+4},b.g); tt.textContent=v; }
     });
@@ -556,25 +563,25 @@ function drawMatrixBoard(x,y){
 }
 
 /* ---------- sections board ---------- */
-function drawSectionsBoard(x,y){ const W=1520, b=board("sections","Sections · Tabel 3","Original cross-sections from the paper (raster, as published)",x,y,W,640,{tag:"Source"});
+function drawSectionsBoard(x,y){ const W=1520, b=board("sections",tr("Sections · Tabel 3","Potongan · Tabel 3"),tr("Original cross-sections from the paper (raster, as published)","Potongan asli dari paper (raster, sesuai terbitan)"),x,y,W,640,{tag:tr("Source","Sumber")});
   HOUSES.forEach((h,k)=>{ const col=k%4,row=Math.floor(k/4); const X=18+col*(W-36)/4, Y=90+row*270;
     const im=el("image",{href:D.sections[h.section],x:X,y:Y,width:(W-36)/4-14,height:230,preserveAspectRatio:"xMidYMid meet"},b.g);
-    const t=el("text",{class:"mtx-h",x:X+((W-36)/4-14)/2,y:Y+250},b.g); t.textContent=h.name+" · "+h.roof; });
-  const c=el("text",{class:"board-cap",x:18,y:626},b.g); c.textContent="Colours in the source: green = Lubu Penang, yellow = Padua Uma, pink = upper storage levels.";
+    const t=el("text",{class:"mtx-h",x:X+((W-36)/4-14)/2,y:Y+250},b.g); t.textContent=h.name+" · "+lc(h,"roof"); });
+  const c=el("text",{class:"board-cap",x:18,y:626},b.g); c.textContent=tr("Colours in the source: green = Lubu Penang, yellow = Padua Uma, pink = upper storage levels.","Warna pada sumber: hijau = Lubu Penang, kuning = Padua Uma, merah muda = level penyimpanan atas.");
 }
 
 /* ---------- similarity ---------- */
 function sim(a,b){ const A=H[a].cellType,B=H[b].cellType; const keys=new Set([...Object.keys(A),...Object.keys(B)].filter(k=>{const [i,j]=k.split(",").map(Number); return i>=0&&i<=4&&j>=0&&j<=4;}));
   let same=0; keys.forEach(k=>{ if(A[k]&&A[k]===B[k]) same++; }); return keys.size? same/keys.size : 0; }
 function drawSimilarityBoard(x,y){ const n=HOUSES.length, c=62, lw=120, top=120; const W=lw+n*c+60, Hh=top+n*c+70;
-  const b=board("similarity","Layout similarity","Share of the 25 structural cells holding the same space type",x,y,W,Hh,{tag:"Derived"});
+  const b=board("similarity",tr("Layout similarity","Kemiripan tata ruang"),tr("Share of the 25 structural cells holding the same space type","Persentase dari 25 sel struktur yang berisi jenis ruang sama"),x,y,W,Hh,{tag:tr("Derived","Turunan")});
   HOUSES.forEach((h,i)=>{ const t=el("text",{class:"mtx-r",x:lw-8,y:top+i*c+c/2+4,"text-anchor":"end"},b.g); t.textContent=h.name;
     const t2=el("text",{class:"mtx-h",x:lw+i*c+c/2,y:top-12,transform:`rotate(-35 ${lw+i*c+c/2} ${top-12})`,"text-anchor":"start"},b.g); t2.textContent=h.name;
     HOUSES.forEach((g,j)=>{ const v=sim(h.key,g.key); const X=lw+j*c, Y=top+i*c;
       const r=el("rect",{x:X+1,y:Y+1,width:c-2,height:c-2,rx:4,style:`fill:var(--indigo);fill-opacity:${i===j?.06:(.08+.9*Math.max(0,(v-.3)/.7))}`},b.g);
-      r.addEventListener("pointerenter",e=>showTip(e,`<b>${esc(h.name)} ↔ ${esc(g.name)}</b><br><span class="m">${Math.round(v*100)}% of cells match</span>`)); r.addEventListener("pointerleave",hideTip);
+      r.addEventListener("pointerenter",e=>showTip(e,`<b>${esc(h.name)} ↔ ${esc(g.name)}</b><br><span class="m">${Math.round(v*100)}% ${tr("of cells match","sel sama")}</span>`)); r.addEventListener("pointerleave",hideTip);
       const tt=el("text",{class:"cell-n",x:X+c/2,y:Y+c/2+4,style:v>.75&&i!==j?"fill:var(--sheet)":""},b.g); tt.textContent=i===j?"—":Math.round(v*100); }); });
-  const cap=el("text",{class:"board-cap",x:18,y:Hh-16},b.g); cap.textContent="Main 5 × 5 square only (kitchen annexes excluded). Values in %.";
+  const cap=el("text",{class:"board-cap",x:18,y:Hh-16},b.g); cap.textContent=tr("Main 5 × 5 square only (kitchen annexes excluded). Values in %.","Hanya bujur sangkar utama 5 × 5 (dapur terpisah tidak dihitung). Nilai dalam %.");
 }
 
 /* ---------- findings board ---------- */
@@ -585,7 +592,20 @@ function drawFindingsBoard(x,y){
   const kerLeft=HOUSES.filter(h=>H[h.key].rooms.some(q=>q.type==="kerajialu" && q.bbox[0]<1.05)).length;
   const inaCentre=HOUSES.filter(h=>H[h.key].cellType["2,3"]==="korung_ina_ama").length;
   const front=HOUSES.map(h=>H[h.key].rooms.filter(q=>q.type==="ana_kajaka").length);
-  const F=[
+  const n2=v=>st.lang==="id"? String(v).replace(".",","):v;
+  const F= st.lang==="id" ? [
+   ["new","Satu grid bujur sangkar untuk semua rumah",`Kedelapan denah berdiri di atas bujur sangkar kolom 6 × 6: lima bentang ke setiap arah, bentang tengah sekitar 1,2× lebih lebar dan dipikul empat tiang utama yang tebal. Baris depan bujur sangkar itu adalah teras. Semua denah level atas (Hedang, Umadalu, Jaga Wogu) jatuh pada bujur sangkar yang sama bila diselaraskan pada tiang-tiang tersebut.`],
+   ["new","Fungsi pusat berubah",`Di antara empat tiang utama: ${centre.map((c,i)=>HOUSES[i].name+" = "+c).join("; ")}. Hanya Uma Bakul yang mempertahankan tungku di sana. Pada rumah lain dapur keluar dan lantai komunal mengambil alih pusat.`],
+   ["new","Kiri / kanan juga bergender",`Kerajialu menempati kolom kiri pada ${kerLeft}/8 denah. Halema menempati kolom kanan pada ${halemaRight}/8. Jadi urutan depan/samping/dalam dalam paper juga punya sumbu kiri (kerja perempuan) / kanan (panggung keluarga) yang konsisten.`],
+   ["new","Baris depan selalu lima bentang",`Jumlah Anakajaka per rumah: ${front.join(", ")}. Bila hanya satu, Baga Haga Uma diperpanjang mengisi bentang yang kosong. Panjang teras dan jumlah Anakajaka saling bertukar dalam baris lima bentang yang sama.`],
+   ["new","Kamar orang tua di sumbu",`Korung Ina-Ama menempati sel tepat di depan bentang tengah pada ${inaCentre}/8 rumah: di sumbu tiang utama, bersebelahan dengan dinding depan, dan dicapai lewat lantai utama. Pada gambar kamar ini dangkal (kedalaman 2–3), kurang sesuai dengan bacaan teks sebagai “kamar terdalam”.`],
+   ["bad","Kamar tambahan: teks vs gambar","Bagian E teks menyebut korung tambahan di Uma Adung, Ladu Baru, dan Uma Djaga. Gambar hanya menunjukkannya di Uma Adung dan Ladu Baru. Uma Djaga hanya punya dua kamar dasar."],
+   ["bad","Anakajaka Kerajialu tidak ada di denah","Teks menyebutnya ada di lima rumah dan tidak ada di Kedabura, Uma Adung, dan Uma Nuku. Tidak ada denah yang memakai label itu. “Kapenang Kerajialu” muncul di Kedabura, Kedakadi, Uma Djaga, dan Uma Nuku, yang tidak cocok dengan kedua daftar."],
+   ["bad","Jumlah dapur terpisah","Bagian F menyebut empat dapur terpisah (Kedakadi, Uma Wajal, Uma Adung, Uma Nuku). Paragraf sebelumnya dan denah menambahkan Ladu Baru, jadi lima."],
+   ["ok","Halema bersifat universal",`Halema ada di ${cnt("halema")}/8 denah, selalu berbentuk L. Garis diagonal di sudut L digambar pada enam rumah beratap joglo dan tidak ada di Uma Wajal dan Uma Adung, dua rumah beratap perisai. Perlu dicek apakah garis itu menandai elemen atap.`],
+   ["ok","Jaga Wogu mengikuti atap",`Enam rumah memiliki Umadalu Jaga Wogu. Uma Wajal dan Uma Adung (atap perisai) tidak. Jadi susunan vertikal tiga dunia hanya lengkap di bawah menara joglo.`],
+   ["ok","Kembar lintas suku","Uma Adung (Anakalang) dan Ladu Baru (Kedamaki) hampir identik sel demi sel. Begitu pula Kedabura (Anakalang) dan Uma Djaga (Hawu). Tipe tata ruang tampaknya melintasi batas suku. Bandingkan di papan denah bertumpuk."]
+  ] : [
    ["new","One square grid for every house",`All 8 plans sit on a 6 × 6 column square: five bays each way, the middle bay about 1.2× wider and carried by the four thick main pillars. The front row of that square is the terrace. All the upper-level plans (Hedang, Umadalu, Jaga Wogu) land on the same square when aligned on those pillars.`],
    ["new","The centre changed use",`Between the four main pillars: ${centre.map((c,i)=>HOUSES[i].name+" = "+c).join("; ")}. Only Uma Bakul keeps the hearth there. In the others the kitchen left and a communal floor took the centre.`],
    ["new","Left / right is gendered too",`Kerajialu runs down the left-hand column in ${kerLeft}/8 plans. Halema occupies the right-hand column in ${halemaRight}/8. So the paper's front/side/inner order also has a consistent left (women's work) / right (family platforms) axis.`],
@@ -598,9 +618,9 @@ function drawFindingsBoard(x,y){
    ["ok","Jaga Wogu follows the roof",`Six houses have Umadalu Jaga Wogu. Uma Wajal and Uma Adung (perisai roof) have none. So the vertical three-world stack is complete only under the joglo tower.`],
    ["ok","Twins across clans","Uma Adung (Anakalang) and Ladu Baru (Kedamaki) are almost cell-for-cell identical. So are Kedabura (Anakalang) and Uma Djaga (Hawu). Layout type seems to cut across suku lines. Compare them in the overlay board."]
   ];
-  const W=1520, colW=(W-54)/3, b=board("findings","Re-reading notes","Observations computed from the traced drawings + checks against the paper's text",x,y,W,640,{tag:"Findings"});
+  const W=1520, colW=(W-54)/3, b=board("findings",tr("Re-reading notes","Catatan pembacaan ulang"),tr("Observations computed from the traced drawings + checks against the paper's text","Pengamatan yang dihitung dari gambar jiplakan + pengecekan terhadap teks paper"),x,y,W,640,{tag:tr("Findings","Temuan")});
   F.forEach((f,i)=>{ const col=i%3,row=Math.floor(i/3); const fo=el("foreignObject",{x:18+col*(colW+9),y:84+row*138,width:colW,height:134},b.g);
-    const tag={new:["new","Derived pattern"],bad:["bad","Text ≠ drawing"],ok:["ok","Consistent"]}[f[0]];
+    const tag={new:["new",tr("Derived pattern","Pola turunan")],bad:["bad",tr("Text ≠ drawing","Teks ≠ gambar")],ok:["ok",tr("Consistent","Konsisten")]}[f[0]];
     fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="fo-text"><h4><span class="tag ${tag[0]}">${tag[1]}</span>${esc(f[1])}</h4><p>${esc(f[2])}</p></div>`; });
 }
 
@@ -609,7 +629,7 @@ function renderLegend(){ const L=LENSES[st.lens]; const lg=$("#legend");
   let items=L.vals.map(v=>{ const types= L.key? Object.keys(TYPES).filter(t=>attr(t,L.key)===v && !TYPES[t].level) : [];
     const on = types.length && types.every(t=>st.sel.has(t));
     return `<button class="lg" data-v="${v}" aria-pressed="${on}" ${L.key?"":"disabled"}><i style="background:${L.color(v)}"></i>${esc(L.name(v))}</button>`; }).join("");
-  lg.innerHTML=`<div class="lab">${esc(L.label)} lens</div><div class="items">${items}</div>${L.hint?`<div class="hint">${esc(L.hint)}</div>`:""}<div class="hint">Click a room: highlight that type in all houses. Shift-click to add. I = isolate, Esc = clear.</div>`;
+  lg.innerHTML=`<div class="lab">${tr(esc(L.label)+" lens","Lensa "+esc(L.label))}</div><div class="items">${items}</div>${L.hint?`<div class="hint">${esc(L.hint)}</div>`:""}<div class="hint">${tr("Click a room: highlight that type in all houses. Shift-click to add. I = isolate, Esc = clear.","Klik ruang: sorot jenis itu di semua rumah. Shift-klik untuk menambah. I = isolasi, Esc = hapus.")}</div>`;
   lg.querySelectorAll(".lg").forEach(bn=>bn.addEventListener("click",e=>{ const v=isNaN(+bn.dataset.v)?bn.dataset.v:+bn.dataset.v;
     const types=Object.keys(TYPES).filter(t=>attr(t,L.key)===v); setSel(types, e.shiftKey||e.metaKey); }));
 }
@@ -627,55 +647,61 @@ function renderPanel(){ const P=$("#pbody");
   bindPanel(); }
 function inspectHTML(){
   if(st.cell){ const [i,j]=st.cell.split(",").map(Number);
-    return `<div class="gloss">Structural cell ${i}, ${j} · ring ${ringOf(i,j)}</div><h2>Same position, eight houses</h2><p>What each house puts in this bay of the column grid.</p>
-    <table class="t"><tr><th>House</th><th>Space</th></tr>${HOUSES.map(h=>{ const t=H[h.key].cellType[st.cell]; return `<tr class="${t?"":"miss"}"><td>${esc(h.name)}</td><td>${t?esc(T(t).name):"— (empty / outside)"}</td></tr>`; }).join("")}</table>`; }
+    return `<div class="gloss">${tr("Structural cell","Sel struktur")} ${i}, ${j} · ${tr("ring","cincin")} ${ringOf(i,j)}</div><h2>${tr("Same position, eight houses","Posisi sama, delapan rumah")}</h2><p>${tr("What each house puts in this bay of the column grid.","Apa yang ditempatkan tiap rumah di bentang grid kolom ini.")}</p>
+    <table class="t"><tr><th>${tr("House","Rumah")}</th><th>${tr("Space","Ruang")}</th></tr>${HOUSES.map(h=>{ const t=H[h.key].cellType[st.cell]; return `<tr class="${t?"":"miss"}"><td>${esc(h.name)}</td><td>${t?esc(T(t).name):tr("— (empty / outside)","— (kosong / di luar)")}</td></tr>`; }).join("")}</table>`; }
+  if(!st.sel.size && st.lang==="id") return `<h2>Delapan rumah, satu grid</h2><p>Ruang kerja ini menggambar ulang denah dari paper Solissa &amp; Pekulimu (Langkau Betang 13(1), CC BY 4.0) sebagai geometri yang dapat diklik dan dibandingkan.</p>
+    <h3>Coba</h3><p>• Klik <b>Halema</b> di denah mana pun untuk melihatnya menyala di kedelapan rumah, di susunan vertikal, graf, dan denah bertumpuk.<br>• Ganti lensa ke <b>Cincin</b> atau <b>Kedalaman</b> untuk bacaan turunan.<br>• Klik sel di <b>Konsensus modul</b> untuk membandingkan satu posisi grid.<br>• Seret papan lewat judulnya untuk menata ulang. Tekan <b>N</b> untuk catatan.</p>
+    <h3>Rumah</h3><table class="t"><tr><th>Rumah</th><th>Suku</th><th class="n">Ruang</th><th class="n">Kedalaman rata-rata</th></tr>${HOUSES.map(h=>`<tr><td><a href="#" data-fly="plan-${h.key}">${esc(h.name)}</a></td><td>${esc(h.suku)}</td><td class="n">${H[h.key].rooms.length}</td><td class="n">${H[h.key].meanDepth.toFixed(2).replace(".",",")}</td></tr>`).join("")}</table>
+    <h3>Metode</h3><p>Garis ruang dijiplak dari gambar vektor paper. Setiap denah lalu disesuaikan ke grid bersama dengan mencocokkan enam garis kolomnya ke 0; 1; 2; 3,2; 4,2; 5,2 modul. Pintu diambil dari busur pintu pada gambar. Lantai bale-bale dan teras dianggap saling terbuka. Skala metrik tidak disebutkan dalam paper.</p>`;
   if(!st.sel.size) return `<h2>Eight houses, one grid</h2><p>This workspace re-draws the plans of the paper by Solissa &amp; Pekulimu (Langkau Betang 13(1), CC BY 4.0) as clickable, comparable geometry.</p>
     <h3>Try</h3><p>• Click <b>Halema</b> in any plan to see it light up in all eight, in the stacks, the graphs and the overlay.<br>• Switch the lens to <b>Ring</b> or <b>Depth</b> for the derived readings.<br>• Click a cell in <b>Module consensus</b> to compare one grid position.<br>• Drag a board by its title to rearrange. Press <b>N</b> for a note.</p>
     <h3>Houses</h3><table class="t"><tr><th>House</th><th>Suku</th><th class="n">Spaces</th><th class="n">Mean depth</th></tr>${HOUSES.map(h=>`<tr><td><a href="#" data-fly="plan-${h.key}">${esc(h.name)}</a></td><td>${esc(h.suku)}</td><td class="n">${H[h.key].rooms.length}</td><td class="n">${H[h.key].meanDepth.toFixed(2)}</td></tr>`).join("")}</table>
     <h3>Method</h3><p>Room outlines were traced from the paper's vector drawings. Each plan was then warped onto a common grid by matching its six column lines to 0, 1, 2, 3.2, 4.2, 5.2 modules. Doors come from the door arcs in the drawings. Bale-bale floors and terraces count as open to each other. Real metric scale is not stated in the paper.</p>`;
   const types=[...st.sel]; const t=types[0], m=T(t);
   const rows=HOUSES.map(h=>{ const rs=H[h.key].rooms.filter(r=>r.type===t); const up=H[h.key].utypes.has(t);
-    if(!rs.length) return `<tr class="${up?"":"miss"}"><td>${esc(h.name)}</td><td colspan="4">${up?"present (upper level)":"absent"}</td></tr>`;
+    if(!rs.length) return `<tr class="${up?"":"miss"}"><td>${esc(h.name)}</td><td colspan="4">${up?tr("present (upper level)","ada (level atas)"):tr("absent","tidak ada")}</td></tr>`;
     const a=rs.reduce((s,r)=>s+r.area,0); const dep=rs.map(r=>r.depth).join("/"); const cells=[...new Set(rs.flatMap(r=>Object.keys(r.cells).filter(k=>r.cells[k]>80)))].join(" ");
-    return `<tr><td>${esc(h.name)}</td><td class="n">${rs.length}</td><td class="n">${a.toFixed(2)}</td><td class="n">${dep}</td><td class="n" style="font-size:10.5px">${cells}</td></tr>`; }).join("");
+    return `<tr><td>${esc(h.name)}</td><td class="n">${rs.length}</td><td class="n">${n2f(a)}</td><td class="n">${dep}</td><td class="n" style="font-size:10.5px">${cells}</td></tr>`; }).join("");
   const present=HOUSES.filter(h=>H[h.key].rooms.some(r=>r.type===t)||H[h.key].utypes.has(t)).length;
-  const ex = types.length>1? `<p class="gloss">+ ${types.length-1} more selected: ${types.slice(1).map(x=>esc(T(x).name)).join(", ")}</p>`:"";
+  const ex = types.length>1? `<p class="gloss">+ ${types.length-1} ${tr("more selected","lainnya dipilih")}: ${types.slice(1).map(x=>esc(T(x).name)).join(", ")}</p>`:"";
   return `<div class="gloss">${esc(m.gloss)}</div><h2>${esc(m.name)}</h2>${ex}<p>${esc(m.note||"")}</p>
-   <dl class="kv"><dt>Function</dt><dd>${esc(META.groups[attr(t,"group")]?.label||"")}</dd><dt>Zone</dt><dd>${esc(META.zones[attr(t,"zone")]?.label||"")}</dd><dt>Gender</dt><dd>${esc(META.genders[attr(t,"gender")]?.label||"")}</dd><dt>Sacred</dt><dd>${attr(t,"sacred")} / 3</dd><dt>Present</dt><dd>${present} of 8 houses</dd></dl>
-   <h3>Across the eight houses</h3><table class="t"><tr><th>House</th><th class="n">n</th><th class="n">mod²</th><th class="n">depth</th><th class="n">cells</th></tr>${rows}</table>
-   <p style="font-size:12px">mod² = area in structural modules (one bay squared). Cells are grid positions (column, row) with the front terrace in row 4.</p>`;
+   <dl class="kv"><dt>${tr("Function","Fungsi")}</dt><dd>${esc(gl("groups",attr(t,"group"))||"")}</dd><dt>${tr("Zone","Zona")}</dt><dd>${esc(gl("zones",attr(t,"zone"))||"")}</dd><dt>Gender</dt><dd>${esc(gl("genders",attr(t,"gender"))||"")}</dd><dt>${tr("Sacred","Sakral")}</dt><dd>${attr(t,"sacred")} / 3</dd><dt>${tr("Present","Ada di")}</dt><dd>${present} ${tr("of 8 houses","dari 8 rumah")}</dd></dl>
+   <h3>${tr("Across the eight houses","Di kedelapan rumah")}</h3><table class="t"><tr><th>${tr("House","Rumah")}</th><th class="n">n</th><th class="n">mod²</th><th class="n">${tr("depth","kedalaman")}</th><th class="n">${tr("cells","sel")}</th></tr>${rows}</table>
+   <p style="font-size:12px">${tr("mod² = area in structural modules (one bay squared). Cells are grid positions (column, row) with the front terrace in row 4.","mod² = luas dalam modul struktur (satu bentang kuadrat). Sel adalah posisi grid (kolom, baris) dengan teras depan di baris 4.")}</p>`;
 }
 function layersHTML(){ const L=st.layers; const row=(k,lab,sub)=>`<label class="toggle"><input type="checkbox" id="ly-${k}" ${L[k]?"checked":""}> <span>${lab}<br><span style="color:var(--ink-3);font-size:11.5px">${sub}</span></span></label>`;
+  if(st.lang==="id") return `<h2>Lapisan</h2>${row("fills","Isian ruang","diwarnai sesuai lensa aktif")}${row("ink","Garis jiplakan","gambar asli, disesuaikan ke grid modul")}${row("labels","Nama ruang","label bersih di tiap ruang")}${row("olabels","Label asli","teks sesuai posisinya di gambar sumber")}${row("cols","Kolom","tiang utama dalam warna aksen")}${row("grid","Grid modul","enam garis kolom kanonik")}${row("links","Hubungan akses","pintu (penuh) dan terbuka (putus-putus)")}
+  <h3>Ruang kerja</h3><p><button class="btn" id="resetPos">Kembalikan posisi papan</button></p>`;
   return `<h2>Layers</h2>${row("fills","Room fills","coloured by the current lens")}${row("ink","Traced linework","the original drawing, warped to the module grid")}${row("labels","Room names","clean labels at each room")}${row("olabels","Original labels","the text as placed in the source drawing")}${row("cols","Columns","main pillars in the accent colour")}${row("grid","Module grid","the six canonical column lines")}${row("links","Access links","door (solid) and open (dashed) connections")}
   <h3>Workspace</h3><p><button class="btn" id="resetPos">Reset board positions</button></p>`; }
-function codeHTML(){ const opt=(obj,cur)=>Object.entries(obj).map(([k,v])=>`<option value="${k}" ${k===cur?"selected":""}>${esc(v.label)}</option>`).join("");
-  return `<h2>Codebook</h2><p>Re-code any space type. Every plan, stack, graph and the consensus board recolour straight away. Your changes stay in this browser.</p>
-  <p><button class="btn" id="cbReset">Reset to the paper's reading</button> <button class="btn" id="cbCopy">Copy as JSON</button></p>
-  ${Object.keys(TYPES).map(t=>`<div class="cb-row"><div class="nm"><span>${esc(T(t).name)}</span><span class="gloss" style="font-size:10.5px">${st.cb[t]?"edited":""}</span></div>
-   <div class="sel3"><select data-t="${t}" data-k="group" aria-label="Function">${opt(META.groups,attr(t,"group"))}</select><select data-t="${t}" data-k="zone" aria-label="Zone">${opt(META.zones,attr(t,"zone"))}</select><select data-t="${t}" data-k="gender" aria-label="Gender">${opt(META.genders,attr(t,"gender"))}</select><select data-t="${t}" data-k="sacred" aria-label="Sacred">${[0,1,2,3].map(v=>`<option ${v===attr(t,"sacred")?"selected":""}>${v}</option>`).join("")}</select></div></div>`).join("")}`; }
-function notesHTML(){ return `<h2>Notes</h2><p>Sticky notes live on the canvas. Press N or use “+ Note”. They stay in this browser.</p>
-  ${st.notes.length? `<table class="t">${st.notes.map((n,i)=>`<tr><td><a href="#" data-note="${i}">${esc((n.text||"(empty)").slice(0,60))}</a></td></tr>`).join("")}</table>`:`<p class="empty">No notes yet.</p>`}
-  <p><button class="btn" id="notesCopy">Copy notes + codebook as JSON</button></p>`; }
+function codeHTML(){ const opt=(obj,cur)=>Object.entries(obj).map(([k,v])=>`<option value="${k}" ${k===cur?"selected":""}>${esc(lc(v,"label"))}</option>`).join("");
+  return `<h2>${tr("Codebook","Buku kode")}</h2><p>${tr("Re-code any space type. Every plan, stack, graph and the consensus board recolour straight away. Your changes stay in this browser.","Ubah kode jenis ruang apa pun. Semua denah, susunan vertikal, graf, dan papan konsensus langsung berganti warna. Perubahan tersimpan di peramban ini.")}</p>
+  <p><button class="btn" id="cbReset">${tr("Reset to the paper's reading","Kembalikan ke bacaan paper")}</button> <button class="btn" id="cbCopy">${tr("Copy as JSON","Salin sebagai JSON")}</button></p>
+  ${Object.keys(TYPES).map(t=>`<div class="cb-row"><div class="nm"><span>${esc(T(t).name)}</span><span class="gloss" style="font-size:10.5px">${st.cb[t]?tr("edited","diubah"):""}</span></div>
+   <div class="sel3"><select data-t="${t}" data-k="group" aria-label="${tr("Function","Fungsi")}">${opt(META.groups,attr(t,"group"))}</select><select data-t="${t}" data-k="zone" aria-label="Zone">${opt(META.zones,attr(t,"zone"))}</select><select data-t="${t}" data-k="gender" aria-label="Gender">${opt(META.genders,attr(t,"gender"))}</select><select data-t="${t}" data-k="sacred" aria-label="Sacred">${[0,1,2,3].map(v=>`<option ${v===attr(t,"sacred")?"selected":""}>${v}</option>`).join("")}</select></div></div>`).join("")}`; }
+function notesHTML(){ return `<h2>${tr("Notes","Catatan")}</h2><p>${tr("Sticky notes live on the canvas. Press N or use “+ Note”. They stay in this browser.","Catatan tempel ada di kanvas. Tekan N atau pakai “+ Catatan”. Catatan tersimpan di peramban ini.")}</p>
+  ${st.notes.length? `<table class="t">${st.notes.map((n,i)=>`<tr><td><a href="#" data-note="${i}">${esc((n.text||tr("(empty)","(kosong)")).slice(0,60))}</a></td></tr>`).join("")}</table>`:`<p class="empty">${tr("No notes yet.","Belum ada catatan.")}</p>`}
+  <p><button class="btn" id="notesCopy">${tr("Copy notes + codebook as JSON","Salin catatan + buku kode sebagai JSON")}</button></p>`; }
 function bindPanel(){ const P=$("#pbody");
   P.querySelectorAll("[data-fly]").forEach(a=>a.onclick=e=>{ e.preventDefault(); const b=boards.find(x=>x.id===a.dataset.fly); if(b) fitBoards([b]); });
   P.querySelectorAll("input[id^=ly-]").forEach(c=>c.onchange=()=>{ st.layers[c.id.slice(3)]=c.checked; store.set("layers",st.layers); applyLayers(); });
   P.querySelectorAll("select[data-t]").forEach(s=>s.onchange=()=>{ const t=s.dataset.t,k=s.dataset.k; st.cb[t]=st.cb[t]||{}; st.cb[t][k]= k==="sacred"? +s.value : s.value; store.set("cb",st.cb); recolor(); });
   const on=(id,f)=>{ const n=P.querySelector("#"+id); if(n) n.onclick=f; };
-  on("cbReset",()=>{ st.cb={}; store.set("cb",{}); recolor(); renderPanel(); toast("Codebook reset"); });
+  on("cbReset",()=>{ st.cb={}; store.set("cb",{}); recolor(); renderPanel(); toast(tr("Codebook reset","Buku kode dikembalikan")); });
   on("cbCopy",()=>copy(JSON.stringify(st.cb,null,2)));
   on("notesCopy",()=>copy(JSON.stringify({notes:st.notes,codebook:st.cb},null,2)));
-  on("resetPos",()=>{ st.pos={}; store.set("pos",{}); build(); toast("Boards back in place"); });
+  on("resetPos",()=>{ st.pos={}; store.set("pos",{}); build(); toast(tr("Boards back in place","Papan kembali ke posisi awal")); });
   P.querySelectorAll("[data-note]").forEach(a=>a.onclick=e=>{ e.preventDefault(); const n=st.notes[+a.dataset.note]; fitRect(n.x-100,n.y-100,420,320); });
 }
-function copy(s){ const done=()=>toast("Copied to clipboard"); try{ navigator.clipboard.writeText(s).then(done,()=>fallback()); }catch(e){ fallback(); }
-  function fallback(){ const ta=document.createElement("textarea"); ta.value=s; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); done();}catch(e){ toast("Select the text and copy it manually"); } ta.remove(); } }
+function copy(s){ const done=()=>toast(tr("Copied to clipboard","Tersalin ke papan klip")); try{ navigator.clipboard.writeText(s).then(done,()=>fallback()); }catch(e){ fallback(); }
+  function fallback(){ const ta=document.createElement("textarea"); ta.value=s; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); done();}catch(e){ toast(tr("Select the text and copy it manually","Pilih teksnya dan salin secara manual")); } ta.remove(); } }
 function toast(m){ const t=document.createElement("div"); t.className="toast"; t.textContent=m; stage.appendChild(t); setTimeout(()=>t.remove(),1800); }
 
 /* ---------- notes ---------- */
 let dragN=null;
 function renderNotes(){ const box=$("#notes"); box.innerHTML="";
   st.notes.forEach((n,i)=>{ const d=document.createElement("div"); d.className="note"; d.style.left=n.x+"px"; d.style.top=n.y+"px";
-    d.innerHTML=`<header><span>note ${i+1}</span><button aria-label="Delete note">×</button></header><div contenteditable="true" spellcheck="false"></div>`;
+    d.innerHTML=`<header><span>${tr("note","catatan")} ${i+1}</span><button aria-label="${tr("Delete note","Hapus catatan")}">×</button></header><div contenteditable="true" spellcheck="false"></div>`;
     const ed=d.querySelector("[contenteditable]"); ed.textContent=n.text||"";
     ed.addEventListener("input",()=>{ n.text=ed.textContent; store.set("notes",st.notes); });
     ed.addEventListener("pointerdown",e=>e.stopPropagation());
@@ -690,8 +716,10 @@ function addNote(){ const r=stage.getBoundingClientRect(); const v=st.view; cons
   const eds=document.querySelectorAll(".note [contenteditable]"); const ed=eds[eds.length-1]; ed && ed.focus(); if(st.tab==="notes") renderPanel(); }
 
 /* ---------- goto ---------- */
-function fillGoto(){ const g=$("#goto"); const opts=[["all","Everything"],["plans","Plans row"],["stacks","Vertical row"],["graphs","Access graphs"],["consensus","Module consensus"],["overlay","Superimposed plans"],["vmatrix","Vertical matrix"],["sections","Sections"],["findings","Re-reading notes"]];
-  g.innerHTML=`<option value="">Board…</option>`+opts.map(([v,l])=>`<option value="${v}">${l}</option>`).join("")+HOUSES.map(h=>`<option value="house-${h.key}">${h.name} (all levels)</option>`).join("");
+function fillGoto(){ const g=$("#goto"); const opts= st.lang==="id"
+    ? [["all","Semuanya"],["plans","Baris denah"],["stacks","Baris vertikal"],["graphs","Graf akses"],["consensus","Konsensus modul"],["overlay","Denah bertumpuk"],["vmatrix","Matriks vertikal"],["sections","Potongan"],["findings","Catatan pembacaan ulang"],["similarity","Kemiripan tata ruang"]]
+    : [["all","Everything"],["plans","Plans row"],["stacks","Vertical row"],["graphs","Access graphs"],["consensus","Module consensus"],["overlay","Superimposed plans"],["vmatrix","Vertical matrix"],["sections","Sections"],["findings","Re-reading notes"],["similarity","Layout similarity"]];
+  g.innerHTML=`<option value="">${tr("Board…","Papan…")}</option>`+opts.map(([v,l])=>`<option value="${v}">${l}</option>`).join("")+HOUSES.map(h=>`<option value="house-${h.key}">${h.name} ${tr("(all levels)","(semua level)")}</option>`).join("");
   g.onchange=()=>{ const v=g.value; g.value=""; if(!v) return; goTo(v); }; }
 function goTo(v){ const pick=f=>boards.filter(f);
   if(v==="all") return fitBoards(boards);
@@ -716,6 +744,27 @@ window.addEventListener("keydown",e=>{ if(e.target.closest("[contenteditable],in
   if(e.key==="+"||e.key==="=") $("#zin").click(); if(e.key==="-") $("#zout").click(); });
 window.addEventListener("resize",()=>{});
 
-renderLens(); build(); renderNotes(); togglePanel(st.panel); setTab("inspect");
+function applyStatic(){
+  document.documentElement.lang = st.lang;
+  const txt=(sel,en,id)=>{ const n=$(sel); if(n) n.textContent=tr(en,id); };
+  const att=(sel,a,en,id)=>{ const n=$(sel); if(n) n.setAttribute(a,tr(en,id)); };
+  txt("#brandSub","8 houses · 3 suku · Kampung Marapu","8 rumah · 3 suku · Kampung Marapu");
+  txt("#lensLab","Lens","Lensa"); txt("#gotoLab","Go to","Ke");
+  txt("#isoBtn","Isolate","Isolasi"); att("#isoBtn","title","Hide everything except the selection (I)","Sembunyikan semua kecuali pilihan (I)");
+  txt("#clearBtn","Clear","Hapus"); att("#clearBtn","title","Clear selection (Esc)","Hapus pilihan (Esc)");
+  txt("#noteBtn","+ Note","+ Catatan"); att("#noteBtn","title","Add a sticky note at the centre of the view (N)","Tambah catatan tempel di tengah tampilan (N)");
+  txt("#panelBtn","Inspector","Inspektor"); att("#themeBtn","title","Switch light / dark","Ganti terang / gelap");
+  att("#goto","aria-label","Jump to board","Lompat ke papan"); att("#lens","aria-label","Colour lens","Lensa warna");
+  att("#zin","aria-label","Zoom in","Perbesar"); att("#zout","aria-label","Zoom out","Perkecil"); att("#zfit","aria-label","Fit everything","Tampilkan semua"); att("#zfit","title","Fit all (F)","Tampilkan semua (F)");
+  att("#world","aria-label","Infinite canvas of house plans","Kanvas tak hingga denah rumah");
+  txt("#tab-inspect","Inspect","Periksa"); txt("#tab-layers","Layers","Lapisan"); txt("#tab-code","Codebook","Buku kode"); txt("#tab-notes","Notes","Catatan");
+  document.querySelectorAll("#langSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.lang===st.lang));
+}
+function setLang(l){ if(l===st.lang) return; st.lang=l; store.set("lang",l); const v={...st.view};
+  applyStatic(); renderLens(); build(); renderNotes(); renderPanel(); st.view=v; applyView(); }
+document.querySelectorAll("#langSeg button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+const n2f=v=> st.lang==="id"? v.toFixed(2).replace(".",",") : v.toFixed(2);
+
+applyStatic(); renderLens(); build(); renderNotes(); togglePanel(st.panel); setTab("inspect");
 requestAnimationFrame(()=>goTo("plans"));
 </script>
