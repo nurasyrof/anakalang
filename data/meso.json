@@ -1,0 +1,53 @@
+{
+  "source": {
+    "title": "Pola Pemukiman Kampung Adat Anakalang: Keberlanjutan Budaya Megalitik di Sumba Tengah",
+    "author": "Retno Handini",
+    "journal": "KALPATARU, Majalah Arkeologi 28(2), 2019, 33–44"
+  },
+  "desa": {
+    "area_km2": 8.35, "population": 3423, "male": 1727, "female": 1696, "year": 2017, "density_stated": 382,
+    "kampung_count": 17, "dusun": 4, "rw": 4, "rt": 13,
+    "coord": "9°35'27\" S, 119°34'27.96\" E",
+    "kabisu": ["Doku","Gawi","Sara","Sawu","Waikawolu","Kabela Wuntu","Wailawa","Matolang","Makata Keri","Taupopu Ana Mbura","Mata Regi Mata Woka","Waikawolu"],
+    "ritual": "Purung Ta Kadonga Ratu",
+    "table1": {"1":["Tamenyal","Anakalang","Madedi Jawa","Waikajawi","Padedewaeri","Palajara","Wairasa"],"2":["Galokawungu","Patirukima","Kabujaga","Galu Marada"],"3":["Pasunga","Lolajangi","Galugua","Lai Maijulung"],"4":["Ngaduradi","Laimutu"]}
+  },
+  "kampung": [
+    {"key":"anakalang","name":"Kampung Anakalang","dusun":1,"lon":[119,34,2.4],"lat":[9,35,38.5],"elev":491,"kk":17,"houses":8,"graves":73,"era":"old","terrain":"hill","img":"site_anakalang","fig":"Gambar 4",
+     "pattern":"Linear, following the contour","pattern_id":"Linier, mengikuti kontur",
+     "note":"Oldest kampung of the area, about 5 km from Waibakul and hard to reach. About 150 houses in the 1980s; most were left because water is about 1 km away. Nearly all 73 graves are old natural-stone reti. Former house footings show the linear layout.",
+     "note_id":"Kampung tertua di wilayah ini, sekitar 5 km dari Waibakul dan sulit dijangkau. Sekitar 150 rumah pada 1980-an; sebagian besar ditinggalkan karena sumber air sekitar 1 km. Hampir semua dari 73 kubur batu adalah reti tua dari batu alam. Bekas umpak rumah menunjukkan pola linier."},
+    {"key":"wairasa","name":"Kampung Wairasa","dusun":1,"lon":[119,34,2.4],"lat":[9,34,1.4],"elev":503,"kk":3,"houses":3,"graves":null,"era":"old","terrain":"hill","img":"site_wairasa","fig":"Gambar 5","coordFlag":true,
+     "pattern":"Linear, following the contour; graves in front of the houses","pattern_id":"Linier, mengikuti kontur; kubur batu di depan rumah",
+     "note":"Hilltop kampung with 3 houses. The stated coordinate looks wrong (see notes).",
+     "note_id":"Kampung di puncak bukit dengan 3 rumah. Koordinat yang tercantum tampaknya keliru (lihat catatan)."},
+    {"key":"madedijawa","name":"Kampung Madedi Jawa","dusun":1,"lon":[119,34,8.3],"lat":[9,35,35.7],"elev":462,"kk":6,"houses":4,"graves":17,"era":"old","terrain":"hill","img":"site_madedijawa","fig":"Gambar 6",
+     "pattern":"Linear, houses facing each other","pattern_id":"Linier, rumah saling berhadapan",
+     "note":"Old hill kampung with four houses and 17 stone graves.",
+     "note_id":"Kampung bukit lama dengan empat rumah dan 17 kubur batu."},
+    {"key":"waikajawi","name":"Kampung Waikajawi","dusun":1,"lon":[119,34,20.6],"lat":[9,35,36.2],"elev":453,"kk":20,"houses":null,"housesMap":20,"graves":38,"gravesLabel":"38 megalithic structures","gravesLabel_id":"38 bangunan megalitik","era":"new","terrain":"flat","img":"site_waikajawi","fig":"Gambar 7",
+     "pattern":"Linear, facing each other, megaliths in the central yard","pattern_id":"Linier, saling berhadapan, megalit di halaman tengah",
+     "note":"On flat ground about 700 m from Waibakul town. The author lived here during fieldwork. Umbu Siwa Djurumana's house burned in 2010 and was rebuilt in cement and zinc, keeping round columns and Sumba ornament.",
+     "note_id":"Di dataran sekitar 700 m dari kota Waibakul. Penulis tinggal di sini selama penelitian. Rumah Umbu Siwa Djurumana terbakar pada 2010 dan dibangun ulang dengan semen dan seng, tetap memakai tiang bulat dan ragam hias Sumba."},
+    {"key":"pasunga","name":"Kampung Pasunga","dusun":3,"lon":[119,34,29.2],"lat":[9,35,18.2],"elev":468,"kk":36,"houses":null,"graves":100,"gravesApprox":true,"era":"new","terrain":"flat","img":"site_pasunga","fig":"Gambar 8",
+     "pattern":"Very regular: two symmetric facing rows split by the graves","pattern_id":"Sangat teratur: dua baris simetris saling berhadapan dipisah kubur batu",
+     "note":"Roadside, about 1 km from Waibakul, the main tourist destination of Sumba Tengah. Founded by Umbu Kalung Dapamudang, who came from Kampung Anakalang. When the centre filled up, newer graves went to the front yard.",
+     "note_id":"Di tepi jalan, sekitar 1 km dari Waibakul, destinasi wisata utama Sumba Tengah. Didirikan oleh Umbu Kalung Dapamudang yang berasal dari Kampung Anakalang. Ketika halaman tengah penuh, kubur baru ditempatkan di halaman depan."}
+  ],
+  "footprints": [
+    {"id":"A","x":378,"y":108,"r":30,"tower":true,"annex":true,"thatch":false,"annexDir":"N","annexDir_id":"U"},
+    {"id":"B","x":291,"y":155,"r":26,"tower":true,"annex":true,"thatch":false,"annexDir":"E","annexDir_id":"T"},
+    {"id":"C","x":303,"y":205,"r":26,"tower":true,"annex":false,"thatch":true},
+    {"id":"D","x":196,"y":217,"r":28,"tower":false,"annex":true,"thatch":false,"annexDir":"S","annexDir_id":"S","hint":"adung",
+     "hintText":"If the house fronts the grave spine to its east, the kitchen building sits on its left-rear side, as in the Uma Adung plan.",
+     "hintText_id":"Bila rumah menghadap deretan kubur di timurnya, bangunan dapur berada di sisi kiri-belakang, seperti pada denah Uma Adung."},
+    {"id":"E","x":277,"y":306,"r":30,"tower":false,"annex":true,"thatch":false,"annexDir":"E","annexDir_id":"T","hint":"wajal",
+     "hintText":"If the house fronts the grave spine to its west, the kitchen building sits behind it, as in the Uma Wajal plan.",
+     "hintText_id":"Bila rumah menghadap deretan kubur di baratnya, bangunan dapur berada di belakangnya, seperti pada denah Uma Wajal."},
+    {"id":"F","x":252,"y":342,"r":30,"tower":true,"annex":false,"thatch":false},
+    {"id":"G","x":148,"y":347,"r":30,"tower":true,"annex":true,"thatch":false,"annexDir":"SW","annexDir_id":"BD"},
+    {"id":"H","x":156,"y":420,"r":30,"tower":true,"annex":false,"thatch":false}
+  ],
+  "talora": [[228,150],[268,150],[282,200],[282,280],[255,318],[242,390],[222,445],[190,488],[155,488],[168,420],[178,360],[205,318],[215,280],[222,200]],
+  "graves2": [[328,102],[358,102],[358,178],[328,178]]
+}

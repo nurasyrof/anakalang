@@ -12,9 +12,24 @@ data = ROOT / "data"
 meta = json.loads((data / "meta.json").read_text())
 plans = json.loads((data / "plans.json").read_text())
 upper = json.loads((data / "upper.json").read_text())
+def jpeg_size(b):
+    i = 2
+    while i < len(b):
+        if b[i] != 0xFF: i += 1; continue
+        m = b[i + 1]
+        if m in (0xC0, 0xC1, 0xC2):
+            return int.from_bytes(b[i + 7:i + 9], "big"), int.from_bytes(b[i + 5:i + 7], "big")
+        i += 2 + int.from_bytes(b[i + 2:i + 4], "big")
+
+meso = json.loads((data / "meso.json").read_text())
+meso["img"], meso["imgSize"] = {}, {}
+for f in sorted((data / "meso").glob("*.jpg")):
+    raw = f.read_bytes()
+    meso["img"][f.stem] = "data:image/jpeg;base64," + base64.b64encode(raw).decode()
+    meso["imgSize"][f.stem] = jpeg_size(raw)
 sections = ["data:image/png;base64," + base64.b64encode((data / f"p10_{i}.png").read_bytes()).decode() for i in range(8)]
 
-payload = json.dumps({"meta": meta, "plans": plans, "upper": upper, "sections": sections}, separators=(",", ":"))
+payload = json.dumps({"meta": meta, "plans": plans, "upper": upper, "sections": sections, "meso": meso}, separators=(",", ":"))
 page = (ROOT / "src" / "atlas.template.html").read_text().replace("__DATA__", payload)
 
 dist = ROOT / "dist"

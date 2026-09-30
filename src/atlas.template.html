@@ -119,6 +119,15 @@ svg#world{position:absolute;inset:0;width:100%;height:100%;display:block}
 .room.sel-able.sel,.node.sel-able.sel,.cell.sel-able.sel{stroke:var(--ink);stroke-width:2.2}
 .chip-u.sel rect{stroke:var(--ink);stroke-width:2}
 .cellhi{fill:none;stroke:var(--focus);stroke-width:3;vector-effect:non-scaling-stroke;pointer-events:none}
+.talora{fill:var(--kombu);fill-opacity:.16;stroke:var(--kombu);stroke-width:1.2;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}
+.talora-t{font-size:11px;font-weight:700;font-stretch:78%;fill:var(--kombu);letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
+.foot{cursor:pointer}
+.foot circle{fill:var(--sheet);fill-opacity:.55;stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
+.foot.known circle{stroke-dasharray:none;fill-opacity:.7}
+.foot:hover circle,.foot.sel circle{fill:var(--accent);fill-opacity:.25;stroke-width:3}
+.foot text{font-size:14px;font-weight:800;font-stretch:75%;fill:var(--ink);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--sheet);stroke-width:3px}
+.foot text.foot-n{font-size:8px;font-weight:650}
+.board-bg.focus{stroke:var(--accent);stroke-width:4}
 /* notes */
 .note{position:absolute;width:220px;background:var(--g-women);color:#231a06;border-radius:3px;box-shadow:var(--shadow);font-size:13px;transform-origin:0 0}
 .note header{display:flex;justify-content:space-between;align-items:center;padding:4px 6px 2px 8px;cursor:move;font-family:var(--f-mono);font-size:10px;opacity:.8}
@@ -180,6 +189,8 @@ table.t tr.miss td{color:var(--ink-3)}
     <div class="brand"><b>Anakalang Uma Atlas</b><span id="brandSub">8 houses · 3 suku · Kampung Marapu</span></div>
     <div class="grp"><span class="lab" id="lensLab">Lens</span>
       <div class="seg" id="lens" role="group" aria-label="Colour lens"></div></div>
+    <div class="grp"><span class="lab" id="scaleLab">Scale</span>
+      <div class="seg" id="scaleSeg" role="group" aria-label="Scale"><button data-scale="desa">Desa</button><button data-scale="kampung">Kampung</button><button data-scale="rumah" id="scRumah">House</button></div></div>
     <div class="grp"><span class="lab" id="gotoLab">Go to</span>
       <select class="btn" id="goto" aria-label="Jump to board"></select></div>
     <button class="btn" id="isoBtn" aria-pressed="false" title="Hide everything except the selection (I)">Isolate</button>
@@ -221,6 +232,7 @@ const store = {
 const st = {
   lens: store.get("lens","group"), sel: new Set(), isolate:false, cell:null,
   layers: Object.assign({ink:true, fills:true, labels:true, cols:true, grid:false, links:false, olabels:false}, store.get("layers",{})),
+  assign: store.get("assign",{}), foot:null,
   cb: store.get("cb",{}), notes: store.get("notes",[]), pos: store.get("pos",{}),
   view: {x:0,y:0,k:.3}, tab:"inspect", panel: window.innerWidth>760
 };
@@ -349,8 +361,8 @@ function moveBoardDrag(e){ const d=dragB, k=st.view.k; d.b.x=d.x+(e.clientX-d.sx
 function endBoardDrag(){ const b=dragB.b; if(b.x!==dragB.x||b.y!==dragB.y){ st.pos[b.id]=[Math.round(b.x),Math.round(b.y)]; store.set("pos",st.pos);} dragB=null; }
 
 /* ---------- selection ---------- */
-function setSel(types, additive){ if(!additive) st.sel.clear(); types.forEach(t=> (additive && st.sel.has(t) && types.length===1) ? st.sel.delete(t) : st.sel.add(t)); st.cell=null; renderSel(); }
-function clearSel(){ st.sel.clear(); st.cell=null; renderSel(); }
+function setSel(types, additive){ st.foot=null; if(!additive) st.sel.clear(); types.forEach(t=> (additive && st.sel.has(t) && types.length===1) ? st.sel.delete(t) : st.sel.add(t)); st.cell=null; renderSel(); }
+function clearSel(){ st.sel.clear(); st.cell=null; st.foot=null; renderSel(); }
 function renderSel(){
   world.classList.toggle("has-sel", st.sel.size>0 || !!st.cell);
   world.classList.toggle("isolate", st.isolate && (st.sel.size>0||!!st.cell));
@@ -362,6 +374,9 @@ function renderSel(){
   document.querySelectorAll(".cellhi").forEach(n=>n.remove());
   if(st.cell){ const [i,j]=st.cell.split(",").map(Number); const [x0,x1]=cellB(i),[y0,y1]=cellB(j);
     document.querySelectorAll("g.plan-geo").forEach(g=>el("rect",{class:"cellhi",x:x0,y:y0,width:x1-x0,height:y1-y0},g)); }
+  const fh = st.foot ? footHouse(MZ.footprints.find(q=>q.id===st.foot)) : null;
+  document.querySelectorAll(".foot").forEach(n=>n.classList.toggle("sel", n.dataset.foot===st.foot));
+  boards.forEach(b=>b.g.querySelector(".board-bg").classList.toggle("focus", !!fh && b.id.endsWith("-"+fh)));
   $("#isoBtn").classList.toggle("on",st.isolate); $("#isoBtn").setAttribute("aria-pressed",st.isolate);
   renderLegend(); if(st.tab==="inspect") renderPanel();
 }
@@ -442,6 +457,7 @@ function build(){
   drawSectionsBoard(AX,ROW_B+660);
   drawFindingsBoard(AX,ROW_B+1360);
   drawSimilarityBoard(AX,ROW_B+2060);
+  drawMeso();
   recolor(); renderSel(); fillGoto();
 }
 
@@ -517,7 +533,7 @@ function drawConsensus(){ if(!consG) return; consG.innerHTML="";
     else if(st.lens==="depth"){ const ds=HOUSES.map(h=>H[h.key].cellRoom[key]).filter(Boolean).map(r=>r.depth||0); col=LENSES.depth.color(Math.round(ds.reduce((a,b)=>a+b,0)/ds.length)); }
     else col=LENSES[st.lens].color(attr(bt,LENSES[st.lens].key));
     const r=el("rect",{class:"cell sel-able",x:X,y:Y,width:W,height:Hh,"data-type":bt,style:`fill:${col};fill-opacity:${.25+.75*bv/8}`},consG);
-    r.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); st.sel.clear(); st.cell = st.cell===key? null : key; renderSel(); setTab("inspect"); });
+    r.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); st.sel.clear(); st.foot=null; st.cell = st.cell===key? null : key; renderSel(); setTab("inspect"); });
     r.addEventListener("pointerenter",e=>showTip(e,`<b>${tr("Cell","Sel")} ${i},${j}</b> · ${tr("ring","cincin")} ${ringOf(i,j)}<br>`+Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`${esc(T(t).name)} <span class="m">${n}/8</span>`).join("<br>")));
     r.addEventListener("pointerleave",hideTip);
     const tt=el("text",{class:"cell-t",x:X+W/2,y:Y+Hh/2-4},consG); const nm=T(bt).name.replace("Korung ","K. ").replace("Baga ","B. ").replace("Kapenang ","Kap. "); tt.textContent=nm.length>11&&W<60? nm.slice(0,10)+"…":nm;
@@ -584,6 +600,155 @@ function drawSimilarityBoard(x,y){ const n=HOUSES.length, c=62, lw=120, top=120;
   const cap=el("text",{class:"board-cap",x:18,y:Hh-16},b.g); cap.textContent=tr("Main 5 × 5 square only (kitchen annexes excluded). Values in %.","Hanya bujur sangkar utama 5 × 5 (dapur terpisah tidak dihitung). Nilai dalam %.");
 }
 
+/* ---------- meso: kampung & desa ---------- */
+const MZ = D.meso;
+const houseSig = k => ({tower: !!H[k].upper.jaga, annex: H[k].rooms.some(r=>r.type==="pinu_paotung"), thatch: /alang/.test(HOUSES.find(h=>h.key===k).roof)});
+const footCands = f => HOUSES.filter(h=>{ const s=houseSig(h.key); return s.tower===f.tower && s.annex===f.annex && s.thatch===f.thatch; }).map(h=>h.key);
+const footHouse = f => { const c=footCands(f); return c.length===1 ? c[0] : (st.assign[f.id] && c.includes(st.assign[f.id]) ? st.assign[f.id] : null); };
+const hName = k => HOUSES.find(h=>h.key===k).name;
+const dms = a => a[0]+a[1]/60+a[2]/3600;
+const MY1=-2080, MY2=-1150;
+function imgBoard(id,title,sub,tag,x,y,img,scale,extraH=0,cap){
+  const [w,h]=MZ.imgSize[img]; const W=Math.round(w*scale)+36, Hh=Math.round(h*scale)+96+extraH;
+  const b=board(id,title,sub,x,y,W,Hh,{tag});
+  el("image",{href:MZ.img[img],x:18,y:78,width:w*scale,height:h*scale},b.g);
+  if(cap){ const c=el("text",{class:"board-cap",x:18,y:Hh-14},b.g); c.textContent=cap; }
+  return b;
+}
+function drawMeso(){
+  rowTitle(tr("Meso · Kampung","Meso · Kampung"),tr("Site plans of Kampung Anakalang and four other kampung adat in Desa Anakalang (Handini 2019; location map from the house paper).","Peta situasi Kampung Anakalang dan empat kampung adat lain di Desa Anakalang (Handini 2019; peta lokasi dari paper rumah adat)."),0,MY1-60);
+  // A: location map with footprints
+  const sc=1.25, [lw,lh]=MZ.imgSize.loc_map;
+  const b=board("site-marapu",tr("Kampung Marapu Anakalang · 8 houses","Kampung Marapu Anakalang · 8 rumah"),tr("Location map (house paper, Gambar 1). Click a footprint.","Peta lokasi (paper rumah adat, Gambar 1). Klik jejak rumah."),0,MY1,Math.round(lw*sc)+36,Math.round(lh*sc)+110,{tag:tr("Kampung · traced","Kampung · jiplakan")});
+  const g=el("g",{transform:`translate(18,80) scale(${sc})`},b.g);
+  el("image",{href:MZ.img.loc_map,x:0,y:0,width:lw,height:lh,style:"opacity:.9"},g);
+  el("path",{class:"talora",d:"M"+MZ.talora.map(p=>p.join(" ")).join("L")+"Z"},g);
+  el("path",{class:"talora",d:"M"+MZ.graves2.map(p=>p.join(" ")).join("L")+"Z"},g);
+  const tl=el("text",{class:"talora-t",x:236,y:300,transform:"rotate(-68 236 300)"},g); tl.textContent=tr("talora · stone graves","talora · kubur batu");
+  MZ.footprints.forEach(f=>{
+    const k=footHouse(f), c=footCands(f);
+    const fg=el("g",{class:"foot sel-able"+(k?" known":""),"data-foot":f.id,"data-house":k||"",transform:`translate(${f.x},${f.y})`},g);
+    el("circle",{r:f.r},fg);
+    const t1=el("text",{y:-2},fg); t1.textContent=f.id;
+    const t2=el("text",{y:10,class:"foot-n"},fg); t2.textContent= k? hName(k) : c.map(x=>hName(x).replace("Uma ","")).join(" / ");
+    fg.addEventListener("pointerenter",e=>showTip(e,`<b>${tr("Footprint","Jejak")} ${f.id}</b> · ${f.tower?tr("tower roof","atap menara"):tr("hipped roof","atap perisai")}${f.annex?tr(" + separate kitchen"," + dapur terpisah"):""}${f.thatch?tr(" · thatch"," · alang-alang"):""}<br><span class="m">${k?esc(hName(k)):tr("candidates: ","kandidat: ")+c.map(hName).join(", ")}</span>`));
+    fg.addEventListener("pointerleave",hideTip);
+    fg.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); st.sel.clear(); st.cell=null; st.foot=f.id; renderSel(); if(!st.panel) togglePanel(true); setTab("inspect"); });
+  });
+  const n=el("text",{class:"board-sub",x:18+lw*sc-8,y:96,"text-anchor":"end"},b.g); n.textContent="U / N ↑";
+  const cp=el("text",{class:"board-cap",x:18,y:Math.round(lh*sc)+96},b.g); cp.textContent=tr("Footprints matched to houses by roof type, separate kitchen and thatch, all read from the house plans.","Jejak dicocokkan dengan rumah lewat tipe atap, dapur terpisah, dan alang-alang, semuanya dibaca dari denah rumah.");
+  // other site plans
+  let x=Math.round(lw*sc)+36+40;
+  const sites=[["anakalang",.8],["wairasa",.8],["madedijawa",.8],["waikajawi",.7],["pasunga",.75]];
+  sites.forEach(([k,s])=>{ const K=MZ.kampung.find(q=>q.key===k);
+    const bb=imgBoard("site-"+k,K.name,`${K.fig} · ${K.elev} m · ${K.kk} KK${K.graves?` · ${K.gravesLabel?lc(K,"gravesLabel"):(K.gravesApprox?"±":"")+K.graves+tr(" graves"," kubur batu")}`:""}`,K.era==="old"?tr("Old hilltop kampung","Kampung lama di bukit"):tr("Kampung on flat ground, c. 1950","Kampung di dataran, ± 1950"),x,MY1,K.img,s,0,lc(K,"pattern"));
+    x+=bb.w+40; });
+  // row 2
+  rowTitle(tr("Meso · Desa","Meso · Desa"),tr("Desa Anakalang: 17 kampung adat, 3,423 people (2017), 8.35 km², on karst limestone.","Desa Anakalang: 17 kampung adat, 3.423 jiwa (2017), 8,35 km², di atas batugamping karst."),0,MY2-60);
+  drawKampungTable(0,MY2);
+  drawPositions(1180,MY2);
+  const dm=imgBoard("desa-map",tr("Desa Anakalang","Desa Anakalang"),tr("Village map (Gambar 1)","Peta desa (Gambar 1)"),tr("Source","Sumber"),1860,MY2,"desa_map",.78,0,tr("Map by Unggul Prasetyo Wibowo, in Handini 2019.","Peta oleh Unggul Prasetyo Wibowo, dalam Handini 2019."));
+  drawGround(1860+dm.w+40,MY2);
+  drawMesoFindings(1860+dm.w+40+760,MY2);
+}
+function drawKampungTable(x,y){
+  const K=MZ.kampung, W=1140, top=120, rh=118;
+  const b=board("kampung-table",tr("Five sampled kampung","Lima kampung sampel"),tr("Figures as stated in Handini 2019. Bars share one scale per column.","Angka sesuai Handini 2019. Batang memakai satu skala per kolom."),x,y,W,top+K.length*rh+40,{tag:tr("Compared","Perbandingan")});
+  const cols=[[18,tr("Kampung","Kampung")],[250,tr("Elevation","Ketinggian")],[400,"KK"],[560,tr("Houses","Rumah")],[700,tr("Stone graves","Kubur batu")],[880,tr("Pattern","Pola")]];
+  cols.forEach(([cx,t])=>{ const e=el("text",{class:"mtx-rs",x:cx,y:top-14},b.g); e.textContent=t.toUpperCase(); });
+  const maxKK=Math.max(...K.map(k=>k.kk)), maxG=Math.max(...K.map(k=>k.graves||0));
+  K.forEach((k,i)=>{ const yy=top+i*rh; el("line",{class:"gline",x1:18,y1:yy,x2:W-18,y2:yy},b.g);
+    const t=el("text",{class:"mtx-r",x:18,y:yy+24,style:"font-weight:700"},b.g); t.textContent=k.name.replace("Kampung ","");
+    const s=el("text",{class:"mtx-rs",x:18,y:yy+40},b.g); s.textContent=`Dusun ${k.dusun} · ${k.era==="old"?tr("old, hilltop","lama, bukit"):tr("newer, flat","lebih baru, datar")}`;
+    const fo=el("foreignObject",{x:14,y:yy+48,width:230,height:rh-52},b.g);
+    fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="fo-text" style="font-size:11px;line-height:1.35;color:var(--ink-2)">${esc(lc(k,"note")).slice(0,150)}${lc(k,"note").length>150?"…":""}</div>`;
+    const ev=el("text",{class:"cell-t",x:250,y:yy+24,"text-anchor":"start",style:"font-size:13px"},b.g); ev.textContent=k.elev+" m";
+    el("rect",{x:250,y:yy+32,width:(k.elev-440)*2,height:8,rx:2,style:"fill:var(--lv0)"},b.g);
+    const bar=(cx,v,max,lab,fill)=>{ const tt=el("text",{class:"cell-t",x:cx,y:yy+24,"text-anchor":"start",style:"font-size:13px"},b.g); tt.textContent=lab;
+      if(v!=null) el("rect",{x:cx,y:yy+32,width:Math.max(2,130*v/max),height:8,rx:2,style:`fill:${fill}`},b.g); };
+    bar(400,k.kk,maxKK,k.kk+"","var(--indigo)");
+    bar(560,k.houses??k.housesMap,maxKK,k.houses!=null? k.houses+"" : k.housesMap? "≈"+k.housesMap+tr(" (map)"," (peta)") : tr("not stated","tidak disebut"),"var(--g-communal)");
+    bar(700,k.graves,maxG,k.graves!=null? (k.gravesApprox?"±":"")+k.graves : tr("not stated","tidak disebut"),"var(--ink-3)");
+    const fo2=el("foreignObject",{x:876,y:yy+10,width:W-894,height:rh-14},b.g);
+    fo2.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="fo-text" style="font-size:12px">${esc(lc(k,"pattern"))}</div>`;
+    const hit=el("rect",{x:18,y:yy,width:W-36,height:rh,style:"fill:transparent;cursor:pointer"},b.g);
+    hit.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); fitBoards(boards.filter(q=>q.id==="site-"+k.key)); });
+  });
+  el("line",{x1:250+(440-440)*2,y1:top-4,x2:250,y2:top+K.length*rh,class:"gline"},b.g);
+  const c=el("text",{class:"board-cap",x:18,y:top+K.length*rh+26},b.g); c.textContent=tr("Elevation bars start at 440 m. Click a row to open its site plan.","Batang ketinggian dimulai dari 440 m. Klik baris untuk membuka peta situasinya.");
+}
+function drawPositions(x,y){
+  const K=MZ.kampung, W=640, Hh=900, b=board("kampung-pos",tr("Where the kampung sit","Letak kampung"),tr("Plotted from the coordinates in the paper (metres from Kampung Anakalang)","Diplot dari koordinat di paper (meter dari Kampung Anakalang)"),x,y,W,Hh,{tag:tr("Derived","Turunan")});
+  const o=K[0], mx=30.5, my=30.9;   // metres per arc-second at 9.6° S
+  const P=K.map(k=>({k, dx:(dms(k.lon)-dms(o.lon))*3600*mx, dy:-(dms(k.lat)-dms(o.lat))*3600*my}));
+  const s=.55, ox=90, oy=700;
+  const g=el("g",{transform:`translate(${ox},${oy})`},b.g);
+  for(let m=0;m<=900;m+=300){ el("line",{class:"gline",x1:m*s,y1:30,x2:m*s,y2:-640},g); const t=el("text",{class:"dlabel",x:m*s,y:46,"text-anchor":"middle"},g); t.textContent=m+" m"; }
+  for(let m=0;m<=1000;m+=200){ el("line",{class:"gline",x1:-20,y1:-m*s,x2:900*s,y2:-m*s},g); const t=el("text",{class:"dlabel",x:-26,y:-m*s+4,"text-anchor":"end"},g); t.textContent=m; }
+  P.forEach(p=>{ const off=p.k.coordFlag; const px=p.dx*s, py= off? -600 : -p.dy*s;
+    const c=el("circle",{cx:px,cy:py,r:6+ (p.k.kk/36)*10,style:`fill:var(${p.k.era==="old"?"--kombu":"--indigo"});fill-opacity:.85`},g);
+    c.addEventListener("pointerenter",e=>showTip(e,`<b>${esc(p.k.name)}</b><br><span class="m">${p.k.elev} m · ${p.k.kk} KK · ${Math.round(p.dx)} m E, ${Math.round(p.dy)} m N</span>`)); c.addEventListener("pointerleave",hideTip);
+    const right=px>400; const t=el("text",{class:"mtx-r",x:right?px-16:px+16,y:py+4,"text-anchor":right?"end":"start"},g); t.textContent=p.k.name.replace("Kampung ","")+(off?" ↑ "+tr("stated ≈ 3 km N","tercantum ≈ 3 km U"):"")+" · "+p.k.elev+" m";
+  });
+  const lg=el("text",{class:"board-cap",x:18,y:Hh-44},b.g); lg.textContent=tr("Red = old hilltop kampung, blue = kampung settled on flatter ground around 1950. Dot size = households (KK).","Merah = kampung lama di bukit, biru = kampung di dataran sejak sekitar 1950. Ukuran titik = jumlah KK.");
+  const lg2=el("text",{class:"board-cap",x:18,y:Hh-24},b.g); lg2.textContent=tr("Wairasa's stated position is off the chart; the coordinate is probably a typo.","Posisi Wairasa yang tercantum di luar grafik; koordinatnya kemungkinan salah ketik.");
+}
+function drawGround(x,y){
+  const [w1,h1]=MZ.imgSize.spring_section,[w2,h2]=MZ.imgSize.limestone,[w3,h3]=MZ.imgSize.photo_anakalang; const s=.68, W=Math.round(w1*s)+36;
+  const b=board("ground",tr("Ground, water, stone","Tanah, air, batu"),tr("Karst limestone, springs and megaliths (Gambar 2, 3, 9)","Batugamping karst, mata air, dan megalit (Gambar 2, 3, 9)"),x,y,W,900,{tag:tr("Source","Sumber")});
+  el("image",{href:MZ.img.spring_section,x:18,y:80,width:w1*s,height:h1*s},b.g);
+  const c1=el("foreignObject",{x:18,y:84+h1*s,width:W-36,height:74},b.g);
+  c1.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="fo-text" style="font-size:12px">${tr("The hill kampung (Anakalang, Wairasa, Madedi Jawa) sit on hard limestone about 1 km above the Waibakul spring, which flows all year. Newer kampung (Pasunga, Galubua, Laimotu) cluster near that spring. Waihau, on the hill slope, runs only in the rainy season.","Kampung bukit (Anakalang, Wairasa, Madedi Jawa) berada di batugamping keras sekitar 1 km di atas mata air Waibakul yang mengalir sepanjang tahun. Kampung yang lebih baru (Pasunga, Galubua, Laimotu) berkumpul dekat mata air itu. Mata air Waihau di lereng hanya keluar saat musim hujan.")}</div>`;
+  const y2=84+h1*s+84; el("image",{href:MZ.img.limestone,x:18,y:y2,width:w2*s,height:h2*s},b.g);
+  const y3=y2+h2*s+14; el("image",{href:MZ.img.photo_anakalang,x:18,y:y3,width:w3*s,height:h3*s},b.g);
+  const c3=el("foreignObject",{x:30+w3*s,y:y3,width:W-48-w3*s,height:h3*s},b.g);
+  c3.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="fo-text" style="font-size:12px">${tr("Megaliths and adat houses in Kampung Anakalang (Gambar 9). Anakalang also holds the largest stone grave on Sumba, about 80 tonnes.","Megalit dan rumah adat di Kampung Anakalang (Gambar 9). Anakalang juga memiliki kubur batu terbesar di Sumba, sekitar 80 ton.")}</div>`;
+}
+function drawMesoFindings(x,y){
+  const kab=MZ.desa.kabisu, uniq=new Set(kab).size, dens=Math.round(MZ.desa.population/MZ.desa.area_km2);
+  const F= st.lang==="id" ? [
+   ["new","Dua baris di sekitar deretan kubur","Kedua peta menunjukkan 8 rumah Kampung Anakalang dalam dua baris longgar di kedua sisi deretan kubur batu utara–selatan (talora). Ini pola linier saling berhadapan yang dijelaskan Handini untuk kampung adat Anakalang."],
+   ["new","Jejak rumah dikenali dari denah","Tipe atap (menara atau perisai), bangunan dapur terpisah, dan alang-alang vs seng terlihat di kedua peta dan juga diketahui dari denah rumah. Gabungannya menunjuk Uma Bakul secara pasti dan mempersempit setiap jejak lain menjadi 2–3 rumah."],
+   ["new","Rumah induk di kampung induk","Uma Bakul adalah rumah induk (paper 1). Kampung Anakalang adalah kampung tertua, asal pendiri Pasunga (paper 2). Relasi “induk” berulang di skala rumah dan kampung, dan Uma Bakul berada di tengah baris, di samping deretan kubur."],
+   ["new","Teras depan bertemu kubur","Paper 2: kubur ditempatkan di depan rumah agar yang hidup dapat “berkomunikasi” dengan yang mati. Paper 1: Baga Haga Uma dan Anakajaka adalah muka ritual rumah. Baris depan pada skala mikro menjadi antarmuka ke talora. Arah hadap tiap rumah perlu dicek di lapangan."],
+   ["ok","Kampung bukit lama vs kampung datar baru","Anakalang 491 m, Wairasa 503 m, dan Madedi Jawa 462 m berada di bukit batugamping keras dengan baris mengikuti kontur. Waikajawi 453 m dan Pasunga 468 m di tanah lebih datar, dihuni sejak ±1950, lurus dan simetris."],
+   ["ok","Jalan akses bernama kampung anak","Paper 1 menyebut tiga jalur akses: Jalan Waikajawi, Tamenyal, dan Kabujaga. Ketiganya adalah nama kampung adat di Desa Anakalang (Tabel 1, paper 2)."],
+   ["ok","8 rumah menurut kedua paper","Paper 2: 17 KK di 8 rumah (150 rumah pada 1980-an, 73 kubur batu). Paper 1: 3 suku di 8 dari 13 rumah yang tersisa. Kedua peta menunjukkan 8 rumah utama. Suku Hawu (paper 1) kemungkinan sama dengan kabisu Sawu (paper 2)."],
+   ["bad","Koordinat Wairasa","Tercantum 119°34'02,4\" BT, 9°34'01,4\" LS. Bujurnya sama persis dengan Kampung Anakalang dan lintangnya menempatkannya ±3 km di utara kampung lain. Kemungkinan salah ketik."],
+   ["bad",`12 kabisu, ${uniq} nama`,`Daftar dua belas kabisu mengulang Waikawolu, jadi hanya ada ${uniq} nama berbeda.`],
+   ["bad","Kepadatan",`3.423 jiwa / 8,35 km² = ${dens} jiwa per km², bukan 382 seperti tertulis.`],
+   ["new","Petunjuk skala (lemah)","Peta paper 2 punya skala 10 m. Bila simbolnya berskala, satu rumah selebar ±6 m, jadi ±1,1 m per modul. Anggap sebagai batas kasar karena simbol mungkin skematis."]
+  ] : [
+   ["new","Two rows around a grave spine","Both maps show the 8 houses of Kampung Anakalang in two loose rows on either side of a north–south line of stone graves (the talora). It is the linear, facing layout Handini describes for Anakalang's kampung adat."],
+   ["new","Footprints identified from the plans","Roof type (tower or hipped), a separate kitchen building and thatch vs zinc show on both maps and are also known from the house plans. Together they pin Uma Bakul exactly and narrow every other footprint to 2–3 houses."],
+   ["new","Mother house in the mother kampung","Uma Bakul is the rumah induk (paper 1). Kampung Anakalang is the oldest kampung and the origin of Pasunga's founder (paper 2). The 'mother' relation repeats at house and kampung scale, and Uma Bakul sits mid-row, beside the grave spine."],
+   ["new","Front terrace meets the graves","Paper 2: graves go in front of the house so the living can 'communicate' with the dead. Paper 1: Baga Haga Uma and Anakajaka are the ritual face of the house. So the micro front row is the interface to the talora. Check each house's facing on site."],
+   ["ok","Old hilltop vs newer flat kampung","Anakalang 491 m, Wairasa 503 m and Madedi Jawa 462 m sit on hard limestone hills with rows that follow the contour. Waikajawi 453 m and Pasunga 468 m, on flatter ground settled around 1950, are straight and symmetric."],
+   ["ok","Access paths are named after kampung","Paper 1 lists three access paths: Jalan Waikajawi, Tamenyal and Kabujaga. All three are names of kampung adat in Desa Anakalang (Tabel 1, paper 2)."],
+   ["ok","8 houses in both papers","Paper 2: 17 KK in 8 houses (150 houses in the 1980s, 73 stone graves). Paper 1: 3 suku in 8 of 13 remaining houses. Both maps show 8 main houses. Suku Hawu (paper 1) is likely the Sawu kabisu (paper 2)."],
+   ["bad","Wairasa coordinate","Stated as 119°34'02.4\" E, 9°34'01.4\" S. The longitude repeats Kampung Anakalang's exactly and the latitude puts it about 3 km north of the others. Probably a typo."],
+   ["bad",`12 kabisu, ${uniq} names`,`The list of twelve kabisu repeats Waikawolu, so there are only ${uniq} distinct names.`],
+   ["bad","Density",`3,423 people / 8.35 km² = ${dens} per km², not the 382 stated.`],
+   ["new","Scale hint (weak)","Paper 2's maps carry a 10 m bar. If the symbols are to scale, a house is about 6 m across, so about 1.1 m per module. Treat it as a rough bound: the symbols may be schematic."]
+  ];
+  const W=1300, colW=(W-54)/3, b=board("meso-findings",tr("Cross-scale notes","Catatan lintas skala"),tr("House ↔ kampung ↔ desa, and checks on the settlement paper","Rumah ↔ kampung ↔ desa, dan pengecekan paper permukiman"),x,y,W,900,{tag:tr("Findings","Temuan")});
+  F.forEach((f,i)=>{ const col=i%3,row=Math.floor(i/3); const fo=el("foreignObject",{x:18+col*(colW+9),y:84+row*200,width:colW,height:196},b.g);
+    const tag={new:["new",tr("Derived pattern","Pola turunan")],bad:["bad",tr("Check","Perlu dicek")],ok:["ok",tr("Consistent","Konsisten")]}[f[0]];
+    fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="fo-text"><h4><span class="tag ${tag[0]}">${tag[1]}</span>${esc(f[1])}</h4><p>${esc(f[2])}</p></div>`; });
+}
+function footHTML(){
+  const f=MZ.footprints.find(q=>q.id===st.foot); const c=footCands(f), k=footHouse(f);
+  const sig=`${f.tower?tr("Tower (joglo) roof","Atap menara (joglo)"):tr("Hipped (limasan / perisai) roof","Atap limasan / perisai")} · ${f.annex?tr("separate kitchen building","bangunan dapur terpisah")+(f.annexDir?` (${lc(f,"annexDir")})`:""):tr("no separate kitchen","tanpa dapur terpisah")} · ${f.thatch?tr("thatch","alang-alang"):tr("zinc","seng")}`;
+  const rows=c.map(h=>{ const hh=H[h], hm=HOUSES.find(q=>q.key===h); return `<tr><td><b>${esc(hm.name)}</b><br><span style="color:var(--ink-3)">Suku ${esc(hm.suku)} · ${hh.rooms.length} ${tr("spaces","ruang")}</span>${f.hint===h?`<br><span class="gloss">${tr("suggested by orientation","disarankan oleh arah hadap")}</span>`:""}</td>
+    <td style="text-align:right">${c.length>1?`<button class="btn${k===h?" on":""}" data-assign="${h}">${k===h?tr("Assigned","Ditetapkan"):tr("This one","Yang ini")}</button>`:""} <button class="btn" data-open="${h}">${tr("Plan","Denah")}</button></td></tr>`; }).join("");
+  return `<div class="gloss">${tr("Footprint","Jejak")} ${f.id} · Kampung Marapu Anakalang</div><h2>${k?esc(hName(k)):tr("Which house is this?","Rumah yang mana?")}</h2>
+   <p>${sig}</p>
+   <p>${c.length===1? tr("Only one of the eight plans has this signature, so the match is certain.","Hanya satu dari delapan denah yang punya ciri ini, jadi cocoknya pasti.") : tr(`${c.length} of the eight plans share this signature. Pick one if you know it from the field; the choice stays in this browser.`,`${c.length} dari delapan denah punya ciri yang sama. Pilih salah satu bila Anda tahu dari lapangan; pilihan tersimpan di peramban ini.`)}</p>
+   ${f.hint?`<p>${esc(lc(f,"hintText"))}</p>`:""}
+   <table class="t">${rows}</table>
+   ${c.length>1&&st.assign[f.id]?`<p><button class="btn" id="unassign">${tr("Clear assignment","Hapus penetapan")}</button></p>`:""}`;
+}
+
 /* ---------- findings board ---------- */
 function drawFindingsBoard(x,y){
   const cnt=(t)=>HOUSES.filter(h=>H[h.key].rooms.some(r=>r.type===t)).length;
@@ -646,6 +811,7 @@ function renderPanel(){ const P=$("#pbody");
   if(st.tab==="notes") P.innerHTML=notesHTML();
   bindPanel(); }
 function inspectHTML(){
+  if(st.foot) return footHTML();
   if(st.cell){ const [i,j]=st.cell.split(",").map(Number);
     return `<div class="gloss">${tr("Structural cell","Sel struktur")} ${i}, ${j} · ${tr("ring","cincin")} ${ringOf(i,j)}</div><h2>${tr("Same position, eight houses","Posisi sama, delapan rumah")}</h2><p>${tr("What each house puts in this bay of the column grid.","Apa yang ditempatkan tiap rumah di bentang grid kolom ini.")}</p>
     <table class="t"><tr><th>${tr("House","Rumah")}</th><th>${tr("Space","Ruang")}</th></tr>${HOUSES.map(h=>{ const t=H[h.key].cellType[st.cell]; return `<tr class="${t?"":"miss"}"><td>${esc(h.name)}</td><td>${t?esc(T(t).name):tr("— (empty / outside)","— (kosong / di luar)")}</td></tr>`; }).join("")}</table>`; }
@@ -691,6 +857,9 @@ function bindPanel(){ const P=$("#pbody");
   on("cbCopy",()=>copy(JSON.stringify(st.cb,null,2)));
   on("notesCopy",()=>copy(JSON.stringify({notes:st.notes,codebook:st.cb},null,2)));
   on("resetPos",()=>{ st.pos={}; store.set("pos",{}); build(); toast(tr("Boards back in place","Papan kembali ke posisi awal")); });
+  P.querySelectorAll("[data-assign]").forEach(bn=>bn.onclick=()=>{ st.assign[st.foot]=bn.dataset.assign; store.set("assign",st.assign); const v={...st.view}; build(); st.view=v; applyView(); renderSel(); });
+  P.querySelectorAll("[data-open]").forEach(bn=>bn.onclick=()=>goTo("house-"+bn.dataset.open));
+  on("unassign",()=>{ delete st.assign[st.foot]; store.set("assign",st.assign); const v={...st.view}; build(); st.view=v; applyView(); renderSel(); });
   P.querySelectorAll("[data-note]").forEach(a=>a.onclick=e=>{ e.preventDefault(); const n=st.notes[+a.dataset.note]; fitRect(n.x-100,n.y-100,420,320); });
 }
 function copy(s){ const done=()=>toast(tr("Copied to clipboard","Tersalin ke papan klip")); try{ navigator.clipboard.writeText(s).then(done,()=>fallback()); }catch(e){ fallback(); }
@@ -717,12 +886,15 @@ function addNote(){ const r=stage.getBoundingClientRect(); const v=st.view; cons
 
 /* ---------- goto ---------- */
 function fillGoto(){ const g=$("#goto"); const opts= st.lang==="id"
-    ? [["all","Semuanya"],["plans","Baris denah"],["stacks","Baris vertikal"],["graphs","Graf akses"],["consensus","Konsensus modul"],["overlay","Denah bertumpuk"],["vmatrix","Matriks vertikal"],["sections","Potongan"],["findings","Catatan pembacaan ulang"],["similarity","Kemiripan tata ruang"]]
-    : [["all","Everything"],["plans","Plans row"],["stacks","Vertical row"],["graphs","Access graphs"],["consensus","Module consensus"],["overlay","Superimposed plans"],["vmatrix","Vertical matrix"],["sections","Sections"],["findings","Re-reading notes"],["similarity","Layout similarity"]];
+    ? [["all","Semuanya"],["desa","Meso · Desa"],["kampung","Meso · Kampung"],["site-marapu","Peta 8 rumah"],["meso-findings","Catatan lintas skala"],["plans","Baris denah"],["stacks","Baris vertikal"],["graphs","Graf akses"],["consensus","Konsensus modul"],["overlay","Denah bertumpuk"],["vmatrix","Matriks vertikal"],["sections","Potongan"],["findings","Catatan pembacaan ulang"],["similarity","Kemiripan tata ruang"]]
+    : [["all","Everything"],["desa","Meso · Desa"],["kampung","Meso · Kampung"],["site-marapu","Map of the 8 houses"],["meso-findings","Cross-scale notes"],["plans","Plans row"],["stacks","Vertical row"],["graphs","Access graphs"],["consensus","Module consensus"],["overlay","Superimposed plans"],["vmatrix","Vertical matrix"],["sections","Sections"],["findings","Re-reading notes"],["similarity","Layout similarity"]];
   g.innerHTML=`<option value="">${tr("Board…","Papan…")}</option>`+opts.map(([v,l])=>`<option value="${v}">${l}</option>`).join("")+HOUSES.map(h=>`<option value="house-${h.key}">${h.name} ${tr("(all levels)","(semua level)")}</option>`).join("");
   g.onchange=()=>{ const v=g.value; g.value=""; if(!v) return; goTo(v); }; }
 function goTo(v){ const pick=f=>boards.filter(f);
   if(v==="all") return fitBoards(boards);
+  if(v==="kampung") return fitBoards(pick(b=>b.id.startsWith("site-")));
+  if(v==="desa") return fitBoards(pick(b=>["kampung-table","kampung-pos","desa-map","ground","meso-findings"].includes(b.id)));
+  if(v==="rumah") return fitBoards(pick(b=>/^(plan|stack|graph)-/.test(b.id)));
   if(v==="plans") return fitBoards(pick(b=>b.id.startsWith("plan-")));
   if(v==="stacks") return fitBoards(pick(b=>b.id.startsWith("stack-")));
   if(v==="graphs") return fitBoards(pick(b=>b.id.startsWith("graph-")));
@@ -749,7 +921,7 @@ function applyStatic(){
   const txt=(sel,en,id)=>{ const n=$(sel); if(n) n.textContent=tr(en,id); };
   const att=(sel,a,en,id)=>{ const n=$(sel); if(n) n.setAttribute(a,tr(en,id)); };
   txt("#brandSub","8 houses · 3 suku · Kampung Marapu","8 rumah · 3 suku · Kampung Marapu");
-  txt("#lensLab","Lens","Lensa"); txt("#gotoLab","Go to","Ke");
+  txt("#lensLab","Lens","Lensa"); txt("#scaleLab","Scale","Skala"); txt("#scRumah","House","Rumah"); txt("#gotoLab","Go to","Ke");
   txt("#isoBtn","Isolate","Isolasi"); att("#isoBtn","title","Hide everything except the selection (I)","Sembunyikan semua kecuali pilihan (I)");
   txt("#clearBtn","Clear","Hapus"); att("#clearBtn","title","Clear selection (Esc)","Hapus pilihan (Esc)");
   txt("#noteBtn","+ Note","+ Catatan"); att("#noteBtn","title","Add a sticky note at the centre of the view (N)","Tambah catatan tempel di tengah tampilan (N)");
@@ -763,6 +935,7 @@ function applyStatic(){
 function setLang(l){ if(l===st.lang) return; st.lang=l; store.set("lang",l); const v={...st.view};
   applyStatic(); renderLens(); build(); renderNotes(); renderPanel(); st.view=v; applyView(); }
 document.querySelectorAll("#langSeg button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+document.querySelectorAll("#scaleSeg button").forEach(b=>b.onclick=()=>{ document.querySelectorAll("#scaleSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b)); goTo(b.dataset.scale); });
 const n2f=v=> st.lang==="id"? v.toFixed(2).replace(".",",") : v.toFixed(2);
 
 applyStatic(); renderLens(); build(); renderNotes(); togglePanel(st.panel); setTab("inspect");

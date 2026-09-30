@@ -2,7 +2,9 @@
 
 Infinite-canvas workspace for re-reading the eight adat houses of Kampung Marapu Anakalang (Sumba Tengah): modular floor plans, vertical level stacks, access graphs and cross-house pattern boards.
 
-Based on Solissa & Pekulimu, *Tipologi Tata Ruang Dalam Rumah Adat Kampung Marapu Anakalang*, Langkau Betang: Jurnal Arsitektur 13(1), DOI 10.26418/lantang.v13i1.104857 (CC BY 4.0). Plans and sections are derived from that paper's figures.
+The meso layer (kampung and desa) adds Handini, *Pola Pemukiman Kampung Adat Anakalang: Keberlanjutan Budaya Megalitik di Sumba Tengah*, KALPATARU 28(2), 2019: site plans of five kampung, the Desa Anakalang map, and settlement data.
+
+The micro layer is based on Solissa & Pekulimu, *Tipologi Tata Ruang Dalam Rumah Adat Kampung Marapu Anakalang*, Langkau Betang: Jurnal Arsitektur 13(1), DOI 10.26418/lantang.v13i1.104857 (CC BY 4.0). Plans and sections are derived from that paper's figures.
 
 ## Layout
 
@@ -10,6 +12,7 @@ Based on Solissa & Pekulimu, *Tipologi Tata Ruang Dalam Rumah Adat Kampung Marap
 - `data/meta.json` — house attributes and the room-type codebook
 - `data/plans.json`, `data/upper.json` — traced geometry, normalised to the column module
 - `data/p10_*.png` — section drawings (Tabel 3)
+- `data/meso.json`, `data/meso/*.jpg` — kampung data, footprint signatures, site-plan figures
 - `tools/` — extraction scripts (PyMuPDF) used to produce the data from the paper PDF
 - `dist/` — built app (`index.html` opens locally)
 
