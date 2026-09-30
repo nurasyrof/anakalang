@@ -1,0 +1,75 @@
+{
+  "source": {
+    "title": "Tipologi Tata Ruang Dalam Rumah Adat Kampung Marapu Anakalang",
+    "authors": "Arfie Pigan Solissa & Zhygit Archiva Umbu Saki Pekulimu",
+    "journal": "Langkau Betang: Jurnal Arsitektur 13(1)",
+    "doi": "10.26418/lantang.v13i1.104857",
+    "license": "CC BY 4.0"
+  },
+  "groups": {
+    "ritual":   {"label": "Ritual / representation"},
+    "women":    {"label": "Women's work"},
+    "communal": {"label": "Family communal"},
+    "sleep":    {"label": "Sleeping (korung)"},
+    "fire":     {"label": "Fire / kitchen"},
+    "storage":  {"label": "Storage"},
+    "circ":     {"label": "Circulation"},
+    "unknown":  {"label": "Unlabelled"}
+  },
+  "zones": {
+    "publik": {"label": "Public"},
+    "semi":   {"label": "Semi-public"},
+    "privat": {"label": "Private"}
+  },
+  "genders": {
+    "male":   {"label": "Men / representation"},
+    "female": {"label": "Women / work"},
+    "shared": {"label": "Shared"},
+    "none":   {"label": "Not coded"}
+  },
+  "types": {
+    "baga_haga_uma":      {"name": "Baga Haga Uma", "gloss": "Front terrace", "group": "ritual", "zone": "publik", "gender": "male", "sacred": 1, "note": "Public zone and ritual stage. The paper marks longer terraces in Kedabura, Uma Wajal and Kedakadi as a sign of status and ritual intensity."},
+    "ana_kajaka":         {"name": "Ana Kajaka", "gloss": "Terrace bale-bale", "group": "ritual", "zone": "publik", "gender": "male", "sacred": 1, "note": "Daily seat for guests; becomes the seat of the jubir (adat spokesman) during ceremonies. Two units in five houses, one in three."},
+    "anakaja_wawa":       {"name": "Anakaja Wawa", "gloss": "Rear side bale-bale", "group": "women", "zone": "semi", "gender": "female", "sacred": 0, "note": "Labelled only in Uma Bakul. Coded here as a variant of Anakajaka Kerajialu (secondary women's work bale). Interpretive; re-code if field notes say otherwise."},
+    "baga_kerajialu":     {"name": "Baga Kerajialu", "gloss": "Side work terrace", "group": "women", "zone": "publik", "gender": "female", "sacred": 0, "note": "Women's work terrace: washing dishes, sieving rice, preparing food."},
+    "baga_baha_tabung":   {"name": "Baga Baha Tabung", "gloss": "Wash / water terrace", "group": "women", "zone": "publik", "gender": "female", "sacred": 0, "note": "Women's work strip for water and washing, on the outer edge."},
+    "hedang_baha_tabung": {"name": "Hedang Baha Tabung", "gloss": "Water rack", "group": "women", "zone": "semi", "gender": "female", "sacred": 0, "note": "Uma Adung only: rack for water containers between kitchen annex and house."},
+    "baga":               {"name": "Baga", "gloss": "Low service terrace", "group": "women", "zone": "publik", "gender": "female", "sacred": 0, "note": "Kedabura only, at −0.45 (the lowest floor with the kitchen)."},
+    "kerajialu":          {"name": "Kerajialu", "gloss": "Women's work room", "group": "women", "zone": "semi", "gender": "female", "sacred": 0, "note": "Women's work zone: preparing household and ritual meals, storing kitchen tools and clean water."},
+    "kapenang_kerajialu": {"name": "Kapenang Kerajialu", "gloss": "Women's floor platform", "group": "women", "zone": "semi", "gender": "female", "sacred": 0, "note": "Labelled in four plans (Kedabura, Kedakadi, Uma Djaga, Uma Nuku). The text discusses an 'Anakajaka Kerajialu' present in five houses; the two lists do not match."},
+    "kapenang_uma":       {"name": "Kapenang Uma", "gloss": "Main house floor", "group": "communal", "zone": "semi", "gender": "shared", "sacred": 1, "note": "The main floor reached directly from the front door in every house."},
+    "halema":             {"name": "Halema", "gloss": "Inner L-shaped bale-bale", "group": "communal", "zone": "semi", "gender": "shared", "sacred": 1, "note": "L-shaped inner platform for sitting, gathering and sleeping. Present in all eight houses."},
+    "ana_halema":         {"name": "Ana Halema", "gloss": "Hearth-side bale-bale", "group": "communal", "zone": "privat", "gender": "shared", "sacred": 2, "note": "Uma Bakul only: small platforms wrapping the central hearth."},
+    "padua_uma":          {"name": "Padua Uma", "gloss": "Central gathering room", "group": "communal", "zone": "privat", "gender": "shared", "sacred": 1, "note": "Inner family and gathering core. Also the name of the whole middle level (human world)."},
+    "kapenang_karabuk":   {"name": "Kapenang Karabuk", "gloss": "Central hearth platform", "group": "fire", "zone": "privat", "gender": "shared", "sacred": 3, "note": "Uma Bakul only: the hearth kept at the centre of the house, where the paper reads fire as the source of life."},
+    "pinu_paotung":       {"name": "Pinu Paotung", "gloss": "Kitchen hearth", "group": "fire", "zone": "semi", "gender": "female", "sacred": 2, "note": "Moved to a separate annex in five houses, which the paper attributes to fire risk."},
+    "dapur":              {"name": "Dapur", "gloss": "Kitchen (integrated, rear)", "group": "fire", "zone": "semi", "gender": "female", "sacred": 2, "note": "Kedabura and Uma Djaga: kitchen kept inside, at the back-left corner."},
+    "hedang_dapur":       {"name": "Hedang Dapur", "gloss": "Kitchen rack", "group": "storage", "zone": "semi", "gender": "female", "sacred": 0, "note": "Storage rack for cooking tools next to the hearth."},
+    "korung_ina_ama":     {"name": "Korung Ina-Ama", "gloss": "Parents' room", "group": "sleep", "zone": "privat", "gender": "shared", "sacred": 2, "note": "The paper describes it as the deepest, most private room and the family's centre of protective energy."},
+    "korung_ana_ubuk":    {"name": "Korung Ana-Ubuk", "gloss": "Children's room", "group": "sleep", "zone": "privat", "gender": "shared", "sacred": 1, "note": "Room for children and grandchildren."},
+    "korung_boku_apu":    {"name": "Korung Boku-Apu", "gloss": "Grandparents' room", "group": "sleep", "zone": "privat", "gender": "shared", "sacred": 1, "note": "Extra room for larger households."},
+    "korung_olidadi":     {"name": "Korung Olidadi", "gloss": "Extended-family room", "group": "sleep", "zone": "privat", "gender": "shared", "sacred": 1, "note": "Extra room for larger households."},
+    "korung_balang":      {"name": "Korung Balang", "gloss": "Internal granary room", "group": "storage", "zone": "privat", "gender": "shared", "sacred": 1, "note": "Uma Adung: an internal granary room."},
+    "korung":             {"name": "Korung", "gloss": "Room (unspecified)", "group": "sleep", "zone": "privat", "gender": "shared", "sacred": 1, "note": "Uma Bakul: labelled only as Korung."},
+    "korung_marapu":      {"name": "Korung Marapu", "gloss": "Marapu room", "group": "ritual", "zone": "privat", "gender": "male", "sacred": 3, "note": "Uma Bakul only."},
+    "pinu_korung_marapu": {"name": "Pinu Korung Marapu", "gloss": "Marapu ritual bale-bale", "group": "ritual", "zone": "privat", "gender": "male", "sacred": 3, "note": "Uma Bakul only: seat of spiritual authority for Marapu ritual and dialogue."},
+    "link":               {"name": "Passage", "gloss": "Link to kitchen annex", "group": "circ", "zone": "semi", "gender": "none", "sacred": 0, "note": "Unlabelled in the drawings."},
+    "tangga":             {"name": "Stair", "gloss": "Stair (drawn, unlabelled)", "group": "circ", "zone": "publik", "gender": "none", "sacred": 0, "note": "Stair drawn but not named."},
+    "unlabeled":          {"name": "Unlabelled room", "gloss": "Enclosed, no label", "group": "unknown", "zone": "semi", "gender": "none", "sacred": 0, "note": "Ladu Baru: an enclosed cell with no label. It sits where Uma Adung has Korung Balang."},
+    "hedang":             {"name": "Hedang", "gloss": "Rack level 1", "group": "storage", "zone": "semi", "gender": "shared", "sacred": 1, "level": 2, "note": "Rack for household utensils and ready food."},
+    "hedang_korung":      {"name": "Hedang Korung", "gloss": "Room rack", "group": "storage", "zone": "privat", "gender": "shared", "sacred": 1, "level": 2, "note": "Rack for personal goods above the rooms."},
+    "umadalu_korung":     {"name": "Umadalu Korung", "gloss": "Loft over rooms", "group": "storage", "zone": "privat", "gender": "shared", "sacred": 2, "level": 3, "note": "Loft for personal items, mats, farm tools and ritual instruments (gong, drum)."},
+    "umadalu_padua_uma":  {"name": "Umadalu Padua Uma", "gloss": "Loft over the core", "group": "storage", "zone": "privat", "gender": "shared", "sacred": 2, "level": 3, "note": "Loft above the central bay; in Uma Wajal it also stores mats and basic needs."},
+    "umadalu_jaga_wogu":  {"name": "Umadalu Jaga Wogu", "gloss": "Tower attic", "group": "ritual", "zone": "privat", "gender": "male", "sacred": 3, "level": 4, "note": "The most sacred store, for heirlooms and seed grain. Access is led by the head of the family."}
+  },
+  "houses": [
+    {"key": "bakul", "name": "Uma Bakul", "alt": "Kedabura Baradeta", "suku": "Anakalang", "roof": "Joglo, alang-alang", "floor": "Pinang wood + bamboo", "door": "Wood + bamboo", "wall": "Woven bamboo sides", "section": 0, "text": "Mother house (rumah induk). Plan and materials unchanged over generations; thatch roof is obligatory. Venue of the Nyabba ritual."},
+    {"key": "kedabura", "name": "Kedabura", "alt": "Kedabura Kabata", "suku": "Anakalang", "roof": "Joglo, zinc", "floor": "Split bamboo", "door": "Timber board", "wall": "Front: timber / plywood", "section": 1, "text": "Sons-in-law must enter by the side door. The only plan with floor elevations."},
+    {"key": "wajal", "name": "Uma Wajal", "alt": "", "suku": "Anakalang", "roof": "Hipped (perisai), zinc", "floor": "Pinang wood + bamboo", "door": "Timber board", "wall": "Front: bebak bamboo", "section": 2, "text": "Holds the Watukaballa (lightning stone) site, which may not be publicised."},
+    {"key": "adung", "name": "Uma Adung", "alt": "", "suku": "Anakalang", "roof": "Hipped (perisai), zinc", "floor": "Split bamboo", "door": "Timber board", "wall": "Front: bebak bamboo", "section": 3, "text": "Most rooms of the eight: adds Korung Boku-Apu, Olidadi and Balang."},
+    {"key": "kedakadi", "name": "Kedakadi", "alt": "", "suku": "Kedamaki", "roof": "Joglo, zinc", "floor": "Split bamboo", "door": "", "wall": "Front: timber / plywood", "section": 4, "text": "Gathering house of the Kedamaki clan for adat rituals."},
+    {"key": "ladubaru", "name": "Ladu Baru", "alt": "", "suku": "Kedamaki", "roof": "Joglo, zinc", "floor": "Split bamboo", "door": "", "wall": "Front: bebak bamboo", "section": 5, "text": "Gathering house for weddings, funerals and other adat events."},
+    {"key": "djaga", "name": "Uma Djaga", "alt": "", "suku": "Hawu", "roof": "Joglo, zinc", "floor": "Split bamboo", "door": "Bamboo", "wall": "Full woven bamboo (gedek)", "section": 7, "text": "Hawu clan house; kitchen integrated at the back."},
+    {"key": "nuku", "name": "Uma Nuku", "alt": "", "suku": "Hawu", "roof": "Joglo, zinc", "floor": "Split bamboo", "door": "Timber board", "wall": "Full woven bamboo (gedek)", "section": 6, "text": "Hawu clan house; kitchen in a separate annex."}
+  ]
+}

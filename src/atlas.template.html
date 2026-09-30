@@ -1,0 +1,721 @@
+<title>Anakalang Uma Atlas</title>
+<meta name="description" content="Infinite-canvas workspace for re-reading the eight adat houses of Kampung Marapu Anakalang.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a drafting-table canvas (full bleed) with a thin tool rail on top, a legend dock bottom-left and an inspector sheet on the right. */
+:root{
+  --paper:#e8e9e4; --sheet:#f7f7f3; --ink:#1d2433; --ink-2:#4d5566; --ink-3:#8a90a0; --rule:#c9cbc4;
+  --indigo:#233a67; --kombu:#9a3324; --accent:#9a3324; --focus:#2d5bd1;
+  --g-ritual:#7c2436; --g-women:#d49a26; --g-communal:#4f7fa6; --g-sleep:#6c5a93; --g-fire:#c4532c; --g-storage:#7a8a3c; --g-circ:#a3a7ae; --g-unknown:#c7c0b3;
+  --z-publik:#7fae57; --z-semi:#e59b34; --z-privat:#8e2a22;
+  --x-male:#2f5f93; --x-female:#c75b7f; --x-shared:#a69a84; --x-none:#d2d2cc;
+  --s0:#ecdcc8; --s1:#d9a889; --s2:#b8604a; --s3:#7a1f19;
+  --d0:#f1e6a8; --d1:#bfd88f; --d2:#78bf8a; --d3:#3f9d8f; --d4:#2e7690; --d5:#2f4f86; --d6:#2c2a66;
+  --r0:#7a1f19; --r1:#c96a3b; --r2:#e8c07a; --r3:#b9bfb2;
+  --lv0:#6fbf4a; --lv1:#f0c35a; --lv2:#e7a3a0; --lv3:#e7a3a0; --lv4:#d7747a;
+  --room-line:rgba(29,36,51,.55); --dim:.13; --shadow:0 1px 0 rgba(29,36,51,.06),0 8px 24px -12px rgba(29,36,51,.25);
+  --f-ui:"Archivo",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#141821; --sheet:#1c212c; --ink:#e7e5de; --ink-2:#b3b3ad; --ink-3:#7e8290; --rule:#343a48;
+  --indigo:#9fb4e6; --kombu:#e07a62; --accent:#e58a6f; --focus:#8fb0ff;
+  --g-ritual:#c35a6f; --g-women:#e0ae45; --g-communal:#6f9fc7; --g-sleep:#9a88c4; --g-fire:#e0714a; --g-storage:#a1b25a; --g-circ:#6f747d; --g-unknown:#5c5850;
+  --z-publik:#86b862; --z-semi:#e9a443; --z-privat:#c24a3f;
+  --x-male:#5f90cc; --x-female:#e07f9f; --x-shared:#8f8676; --x-none:#474a50;
+  --s0:#3a342d; --s1:#7a5845; --s2:#b8604a; --s3:#e0786a;
+  --d0:#f1e6a8; --d1:#bfd88f; --d2:#78bf8a; --d3:#3fa99a; --d4:#3a8bab; --d5:#5b78c0; --d6:#8a7fd6;
+  --r0:#e0786a; --r1:#c96a3b; --r2:#b99355; --r3:#4a4f48;
+  --lv0:#4f9a33; --lv1:#c9a042; --lv2:#b87a78; --lv3:#b87a78; --lv4:#c35f67;
+  --room-line:rgba(231,229,222,.45); --shadow:0 1px 0 rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#141821; --sheet:#1c212c; --ink:#e7e5de; --ink-2:#b3b3ad; --ink-3:#7e8290; --rule:#343a48;
+  --indigo:#9fb4e6; --kombu:#e07a62; --accent:#e58a6f; --focus:#8fb0ff;
+  --g-ritual:#c35a6f; --g-women:#e0ae45; --g-communal:#6f9fc7; --g-sleep:#9a88c4; --g-fire:#e0714a; --g-storage:#a1b25a; --g-circ:#6f747d; --g-unknown:#5c5850;
+  --z-publik:#86b862; --z-semi:#e9a443; --z-privat:#c24a3f;
+  --x-male:#5f90cc; --x-female:#e07f9f; --x-shared:#8f8676; --x-none:#474a50;
+  --s0:#3a342d; --s1:#7a5845; --s2:#b8604a; --s3:#e0786a;
+  --d0:#f1e6a8; --d1:#bfd88f; --d2:#78bf8a; --d3:#3fa99a; --d4:#3a8bab; --d5:#5b78c0; --d6:#8a7fd6;
+  --r0:#e0786a; --r1:#c96a3b; --r2:#b99355; --r3:#4a4f48;
+  --lv0:#4f9a33; --lv1:#c9a042; --lv2:#b87a78; --lv3:#b87a78; --lv4:#c35f67;
+  --room-line:rgba(231,229,222,.45); --shadow:0 1px 0 rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);
+  color-scheme:dark}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:14px;overflow:hidden;margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr}
+/* top rail */
+.rail{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--sheet);border-bottom:1px solid var(--rule);z-index:5}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:6px;min-width:0}
+.brand b{font-weight:780;font-stretch:72%;font-size:19px;letter-spacing:.01em;text-transform:uppercase;line-height:1}
+.brand span{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:7px;overflow:hidden;background:var(--paper)}
+.seg button{border:0;background:transparent;padding:5px 9px;font-size:12.5px;font-stretch:88%;cursor:pointer;color:var(--ink-2);white-space:nowrap}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.lab{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-stretch:80%}
+.grp{display:flex;align-items:center;gap:6px}
+.btn{border:1px solid var(--rule);background:var(--paper);border-radius:7px;padding:5px 10px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.spacer{flex:1}
+select.btn{padding-right:6px}
+/* canvas */
+.stage{position:relative;overflow:hidden;touch-action:none;cursor:grab;background:
+  radial-gradient(circle at 1px 1px,var(--rule) 1px,transparent 1.2px) 0 0/24px 24px, var(--paper)}
+.stage.panning{cursor:grabbing}
+svg#world{position:absolute;inset:0;width:100%;height:100%;display:block}
+.board-bg{fill:var(--sheet);stroke:var(--rule)}
+.board-title{font-weight:720;font-stretch:78%;font-size:17px;fill:var(--ink);letter-spacing:.02em;text-transform:uppercase}
+.board-sub{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink-3)}
+.board-handle{fill:transparent;cursor:move}
+.board-cap{font-size:11.5px;fill:var(--ink-2)}
+.suku-tag{font-family:var(--f-mono);font-size:10px;fill:var(--accent);letter-spacing:.08em;text-transform:uppercase}
+.row-title{font-weight:800;font-stretch:66%;font-size:44px;fill:var(--ink);opacity:.9;text-transform:uppercase;letter-spacing:.01em}
+.row-sub{font-size:14px;fill:var(--ink-2)}
+.room{stroke:var(--room-line);stroke-width:.8;vector-effect:non-scaling-stroke;cursor:pointer;transition:opacity .15s,fill .2s}
+.room:hover{stroke:var(--ink);stroke-width:2}
+.ink{fill:none;stroke:var(--ink);stroke-width:.55;vector-effect:non-scaling-stroke;opacity:.8;pointer-events:none}
+.inkfill{fill:var(--ink);opacity:.8;pointer-events:none}
+.col{fill:var(--ink);pointer-events:none}
+.col.main{fill:var(--accent)}
+.modgrid{stroke:var(--accent);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-dasharray:3 3;opacity:.5;fill:none;pointer-events:none}
+.rlabel{font-size:.105px;font-stretch:80%;font-weight:600;fill:var(--ink);pointer-events:none;text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:var(--sheet);stroke-width:.025px;stroke-linejoin:round}
+.olabel{font-family:var(--f-mono);font-size:.07px;fill:var(--ink-2);pointer-events:none;text-anchor:middle;dominant-baseline:middle}
+.link-door{stroke:var(--ink);stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:none}
+.link-open{stroke:var(--ink);stroke-width:1.2;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none;opacity:.7}
+.node{stroke:var(--sheet);stroke-width:1.5;cursor:pointer}
+.nlabel{font-size:9.5px;font-stretch:78%;fill:var(--ink);pointer-events:none;text-anchor:middle}
+.dlabel{font-family:var(--f-mono);font-size:10px;fill:var(--ink-3)}
+.gline{stroke:var(--rule);stroke-width:1}
+.lvl-label{font-size:12px;font-weight:700;font-stretch:78%;fill:var(--ink);text-transform:uppercase;letter-spacing:.03em}
+.lvl-sub{font-family:var(--f-mono);font-size:9.5px;fill:var(--ink-3)}
+.chip-u{cursor:pointer}
+.chip-u rect{stroke:var(--room-line);vector-effect:non-scaling-stroke}
+.chip-u text{font-size:9px;font-stretch:80%;font-weight:650;fill:var(--ink);pointer-events:none}
+.pillar{stroke:var(--accent);stroke-width:1.6;opacity:.85}
+.stilt{stroke:var(--ink-3);stroke-width:.8;opacity:.7}
+.cell{stroke:var(--sheet);stroke-width:1.5;cursor:pointer}
+.cell-t{font-size:9.5px;font-stretch:78%;font-weight:650;fill:var(--ink);pointer-events:none;text-anchor:middle}
+.cell-n{font-family:var(--f-mono);font-size:10px;fill:var(--ink-2);pointer-events:none;text-anchor:middle}
+.mtx-h{font-size:11px;font-stretch:80%;font-weight:700;fill:var(--ink);text-anchor:middle}
+.mtx-r{font-size:11.5px;fill:var(--ink)}
+.mtx-rs{font-family:var(--f-mono);font-size:9.5px;fill:var(--ink-3)}
+.fo-text{font-size:13px;line-height:1.45;color:var(--ink);font-family:var(--f-ui)}
+.fo-text h4{margin:0 0 4px;font-size:12px;font-stretch:80%;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.fo-text p{margin:0}
+.fo-text .tag{display:inline-block;font-family:var(--f-mono);font-size:10px;padding:1px 6px;border-radius:9px;margin-right:6px;border:1px solid var(--rule);color:var(--ink-2)}
+.fo-text .tag.ok{border-color:var(--z-publik);color:var(--ink)}
+.fo-text .tag.bad{border-color:var(--kombu);color:var(--kombu)}
+.fo-text .tag.new{border-color:var(--indigo);color:var(--indigo)}
+/* selection states */
+#world.has-sel .sel-able:not(.sel){opacity:var(--dim)}
+#world.isolate .sel-able:not(.sel){opacity:0;pointer-events:none}
+#world.has-sel.isolate .ink{opacity:.18}
+.room.sel-able.sel,.node.sel-able.sel,.cell.sel-able.sel{stroke:var(--ink);stroke-width:2.2}
+.chip-u.sel rect{stroke:var(--ink);stroke-width:2}
+.cellhi{fill:none;stroke:var(--focus);stroke-width:3;vector-effect:non-scaling-stroke;pointer-events:none}
+/* notes */
+.note{position:absolute;width:220px;background:var(--g-women);color:#231a06;border-radius:3px;box-shadow:var(--shadow);font-size:13px;transform-origin:0 0}
+.note header{display:flex;justify-content:space-between;align-items:center;padding:4px 6px 2px 8px;cursor:move;font-family:var(--f-mono);font-size:10px;opacity:.8}
+.note header button{border:0;background:transparent;cursor:pointer;font-size:14px;line-height:1;color:inherit}
+.note div[contenteditable]{padding:4px 10px 10px;min-height:60px;outline:none;line-height:1.4}
+#notes{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}
+#notes .note{pointer-events:auto}
+/* docks */
+.legend{position:absolute;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:min(520px,calc(100% - 32px));background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);display:grid;gap:8px;z-index:3}
+.legend .items{display:flex;flex-wrap:wrap;gap:6px}
+.lg{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:20px;padding:3px 9px 3px 5px;background:var(--paper);font-size:12px;cursor:pointer;font-stretch:88%}
+.lg i{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid var(--room-line)}
+.lg[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.legend .hint{font-size:11.5px;color:var(--ink-3)}
+.zoomer{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:6px;z-index:3}
+.zoomer .btn{width:36px;height:36px;padding:0;font-size:16px;background:var(--sheet)}
+.zoomer .pct{font-family:var(--f-mono);font-size:10.5px;text-align:center;color:var(--ink-3)}
+.panel{position:absolute;top:12px;right:12px;bottom:12px;width:min(360px,calc(100% - 24px));background:var(--sheet);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;z-index:4;overflow:hidden}
+.panel[hidden]{display:none!important}
+.panel .tabs{display:flex;border-bottom:1px solid var(--rule)}
+.panel .tabs button{flex:1;border:0;background:transparent;padding:9px 4px;font-size:12px;font-stretch:84%;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent}
+.panel .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.panel .body{overflow:auto;padding:14px 16px 18px;flex:1;min-height:0}
+.panel h2{margin:0 0 2px;font-size:22px;font-weight:760;font-stretch:76%;text-transform:uppercase;text-wrap:balance;line-height:1.05}
+.panel h3{margin:18px 0 6px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.panel p{margin:6px 0;line-height:1.5;color:var(--ink-2)}
+.gloss{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px}
+.kv dt{color:var(--ink-3)} .kv dd{margin:0}
+table.t{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+table.t th{font-weight:600;color:var(--ink-3);text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:4px 4px;border-bottom:1px solid var(--rule)}
+table.t td{padding:5px 4px;border-bottom:1px solid var(--rule)}
+table.t td.n{font-family:var(--f-mono);text-align:right}
+table.t tr.miss td{color:var(--ink-3)}
+.pill{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;border:1px solid var(--rule)}
+.pill.yes{background:var(--z-publik);border-color:transparent;color:#132006}
+.pill.no{color:var(--ink-3)}
+.cb-row{display:grid;grid-template-columns:1fr;gap:4px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.cb-row .nm{font-weight:650;font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.cb-row .sel3{display:grid;grid-template-columns:1fr 1fr 1fr 56px;gap:4px}
+.cb-row select{font-size:11.5px;padding:3px;border:1px solid var(--rule);border-radius:5px;background:var(--paper);min-width:0}
+.toggle{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;cursor:pointer}
+.empty{color:var(--ink-3);font-size:13px;line-height:1.5}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--sheet);font-size:12px;padding:6px 9px;border-radius:6px;z-index:9;max-width:280px;line-height:1.35;transform:translate(12px,12px)}
+.tip b{font-weight:700} .tip .m{font-family:var(--f-mono);font-size:10.5px;opacity:.8}
+.toast{position:absolute;left:50%;top:16px;transform:translateX(-50%);background:var(--ink);color:var(--sheet);padding:7px 14px;border-radius:20px;font-size:12.5px;z-index:9}
+@media (max-width:760px){
+  .brand span{display:none}
+  .rail{gap:6px;padding-inline:12px}
+  .panel{top:auto;height:55%;left:12px;width:auto}
+  .legend{bottom:calc(72px + env(safe-area-inset-bottom,0px));max-height:30vh;overflow:auto}
+  .seg button{padding:5px 7px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <div class="rail" role="toolbar" aria-label="Workspace tools">
+    <div class="brand"><b>Anakalang Uma Atlas</b><span>8 houses · 3 suku · Kampung Marapu</span></div>
+    <div class="grp"><span class="lab">Lens</span>
+      <div class="seg" id="lens" role="group" aria-label="Colour lens"></div></div>
+    <div class="grp"><span class="lab">Go to</span>
+      <select class="btn" id="goto" aria-label="Jump to board"></select></div>
+    <button class="btn" id="isoBtn" aria-pressed="false" title="Hide everything except the selection (I)">Isolate</button>
+    <button class="btn" id="clearBtn" title="Clear selection (Esc)">Clear</button>
+    <div class="spacer"></div>
+    <button class="btn" id="noteBtn" title="Add a sticky note at the centre of the view (N)">+ Note</button>
+    <button class="btn" id="panelBtn" aria-pressed="true">Inspector</button>
+    <button class="btn" id="themeBtn" title="Switch light / dark">◐</button>
+  </div>
+  <div class="stage" id="stage">
+    <svg id="world" aria-label="Infinite canvas of house plans"><g id="vp"></g></svg>
+    <div id="notes"></div>
+    <div class="legend" id="legend"></div>
+    <div class="zoomer"><button class="btn" id="zin" aria-label="Zoom in">+</button><div class="pct" id="zpct">100%</div><button class="btn" id="zout" aria-label="Zoom out">−</button><button class="btn" id="zfit" aria-label="Fit everything" title="Fit all (F)">⤢</button></div>
+    <aside class="panel" id="panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-inspect" aria-selected="true">Inspect</button>
+        <button role="tab" id="tab-layers" aria-selected="false">Layers</button>
+        <button role="tab" id="tab-code" aria-selected="false">Codebook</button>
+        <button role="tab" id="tab-notes" aria-selected="false">Notes</button>
+      </div>
+      <div class="body" id="pbody"></div>
+    </aside>
+    <div class="tip" id="tip" hidden></div>
+  </div>
+</div>
+
+<script>
+const D = __DATA__;
+const META = D.meta, TYPES = META.types, HOUSES = META.houses;
+const NS = "http://www.w3.org/2000/svg";
+const S = 58;                       // px per module (one structural bay)
+const CL = [0,1,2,3.2,4.2,5.2];     // canonical grid lines: five bays, central bay 1.2×
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem("uma-atlas:"+k); return v? JSON.parse(v): d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem("uma-atlas:"+k, JSON.stringify(v)); }catch(e){} }
+};
+const st = {
+  lens: store.get("lens","group"), sel: new Set(), isolate:false, cell:null,
+  layers: Object.assign({ink:true, fills:true, labels:true, cols:true, grid:false, links:false, olabels:false}, store.get("layers",{})),
+  cb: store.get("cb",{}), notes: store.get("notes",[]), pos: store.get("pos",{}),
+  view: {x:0,y:0,k:.3}, tab:"inspect", panel: window.innerWidth>760
+};
+const $ = s => document.querySelector(s);
+const el = (tag, attrs={}, parent) => { const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; };
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const T = t => TYPES[t] || {name:t, gloss:"", group:"unknown", zone:"semi", gender:"none", sacred:0};
+const attr = (t,k) => (st.cb[t] && st.cb[t][k]!==undefined) ? st.cb[t][k] : T(t)[k];
+
+/* ---------- geometry ---------- */
+function pip(x,y,p){ let c=false; for(let i=0,j=p.length-1;i<p.length;j=i++){ const [xi,yi]=p[i],[xj,yj]=p[j]; if(((yi>y)!=(yj>y)) && (x<(xj-xi)*(y-yi)/(yj-yi)+xi)) c=!c; } return c; }
+function segDist(px,py,[ax,ay],[bx,by]){ const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy; let t=l?((px-ax)*dx+(py-ay)*dy)/l:0; t=Math.max(0,Math.min(1,t)); return Math.hypot(px-ax-t*dx,py-ay-t*dy); }
+const cellIdx = v => { if(v<0) return Math.floor(v); if(v>=5.2) return 5+Math.floor(v-5.2); for(let i=0;i<5;i++) if(v<CL[i+1]) return i; };
+const cellB = i => i<0? [i,i+1] : i>=5? [5.2+(i-5),6.2+(i-5)] : [CL[i],CL[i+1]];
+const ringOf = (i,j) => (i>=0&&i<=4&&j>=0&&j<=4) ? Math.max(Math.abs(i-2),Math.abs(j-2)) : 3;
+
+const H = {};   // house key -> derived data
+HOUSES.forEach(h => {
+  const P = D.plans[h.key];
+  const rooms = P.rooms.map(r => ({...r, house:h.key}));
+  rooms.forEach(r => {
+    const xs=r.poly.map(p=>p[0]), ys=r.poly.map(p=>p[1]);
+    const b=[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];
+    const step=.05; let n=0, best=-1, anchor=[(b[0]+b[2])/2,(b[1]+b[3])/2]; const cells={}, rings=[0,0,0,0];
+    for(let x=b[0]+step/2;x<b[2];x+=step) for(let y=b[1]+step/2;y<b[3];y+=step){
+      if(!pip(x,y,r.poly)) continue; n++;
+      const ci=cellIdx(x), cj=cellIdx(y), key=ci+","+cj; cells[key]=(cells[key]||0)+1; rings[ringOf(ci,cj)]++;
+      let m=Infinity; for(let i=0;i<r.poly.length;i++) m=Math.min(m,segDist(x,y,r.poly[i],r.poly[(i+1)%r.poly.length]));
+      if(m>best){best=m; anchor=[x,y];}
+    }
+    r.area=n*step*step; r.cells=cells; r.anchor=anchor; r.inset=best; r.bbox=b;
+    r.ring=rings.indexOf(Math.max(...rings));
+  });
+  // graph
+  const adj=rooms.map(()=>[]);
+  P.links.forEach(l=>{ if(l.kind!=="wall"){ adj[l.a].push(l.b); adj[l.b].push(l.a);} });
+  const bfs = s => { const d=rooms.map(()=>Infinity); d[s]=0; const q=[s]; while(q.length){ const c=q.shift(); for(const n of adj[c]) if(d[n]===Infinity){ d[n]=d[c]+1; q.push(n);} } return d; };
+  const k=rooms.length;
+  rooms.forEach((r,i)=>{ const d=bfs(i).filter(v=>v<Infinity); const md=d.reduce((a,b)=>a+b,0)/Math.max(1,d.length-1); r.md=md; r.ra= k>2 ? 2*(md-1)/(k-2) : 0; });
+  const ras=rooms.map(r=>r.ra).slice().sort((a,b)=>a-b);
+  rooms.forEach(r=>{ r.intRank = ras.indexOf(r.ra)+1; });
+  // cell -> dominant type (≥25% of the cell)
+  const cellType={}, cellRoom={};
+  const acc={};
+  rooms.forEach(r=>{ for(const key in r.cells){ (acc[key]=acc[key]||{}); acc[key][r.type]=(acc[key][r.type]||0)+r.cells[key]; } });
+  for(const key in acc){ const [i,j]=key.split(",").map(Number); const [x0,x1]=cellB(i),[y0,y1]=cellB(j); const cap=(x1-x0)*(y1-y0)/(.05*.05);
+    let bt=null,bv=0; for(const t in acc[key]) if(acc[key][t]>bv){bv=acc[key][t];bt=t;} if(bv>=.25*cap){ cellType[key]=bt; cellRoom[key]=rooms.filter(r=>r.type===bt).sort((a,b)=>(b.cells[key]||0)-(a.cells[key]||0))[0]; } }
+  const upper={}; (D.upper[h.key]||[]).forEach(u=>upper[u.kind]=u);
+  const utypes=new Set(); (D.upper[h.key]||[]).forEach(u=>u.labels.forEach(l=>{ const t=labelType(l.t); if(t) utypes.add(t); }));
+  H[h.key]={meta:h, P, rooms, adj, cellType, cellRoom, upper, utypes, meanDepth: rooms.reduce((a,r)=>a+(r.depth||0),0)/rooms.length};
+});
+function labelType(s){ const u=s.toUpperCase().trim();
+  if(u.includes("JAGA")) return "umadalu_jaga_wogu"; if(u.includes("UMADALU PADUA")) return "umadalu_padua_uma";
+  if(u.startsWith("UMADALU")) return "umadalu_korung"; if(u.includes("HEDANG KORUNG")) return "hedang_korung";
+  if(u==="HEDANG") return "hedang"; if(u==="KORUNG") return "umadalu_korung"; return null; }
+
+/* ---------- lenses ---------- */
+const LENSES = {
+  group:  {label:"Function", key:"group", vals:Object.keys(META.groups), name:v=>META.groups[v].label, color:v=>`var(--g-${v})`},
+  zone:   {label:"Zone", key:"zone", vals:Object.keys(META.zones), name:v=>META.zones[v].label, color:v=>`var(--z-${v})`, hint:"Public / semi-public / private, after the paper's Gambar 3."},
+  gender: {label:"Gender", key:"gender", vals:Object.keys(META.genders), name:v=>META.genders[v].label, color:v=>`var(--x-${v})`, hint:"Men's representation vs women's work zones, as the paper codes them."},
+  sacred: {label:"Sacred", key:"sacred", vals:[0,1,2,3], name:v=>["0 · profane","1 · social-ritual","2 · protective","3 · Marapu / ancestral"][v], color:v=>`var(--s${v})`, hint:"Interpretive 0–3 coding from the paper's text. Edit it in the Codebook."},
+  depth:  {label:"Depth", room:r=>r.depth, vals:[0,1,2,3,4,5,6], name:v=>"depth "+v, color:v=>`var(--d${Math.min(6,v)})`, hint:"Steps from Baga Haga Uma through doors (detected in the drawings) and open bale-bale floors."},
+  ring:   {label:"Ring", room:r=>r.ring, vals:[0,1,2,3], name:v=>["centre bay","inner ring","outer ring","annex"][v], color:v=>`var(--r${v})`, hint:"Derived: concentric rings of the 5 × 5 column square around the four main pillars."}
+};
+function roomVal(r){ const L=LENSES[st.lens]; return L.room? L.room(r) : attr(r.type, L.key); }
+function roomColor(r){ const v=roomVal(r); return v==null ? "var(--g-unknown)" : LENSES[st.lens].color(v); }
+function typeVal(t){ const L=LENSES[st.lens]; return L.key? attr(t,L.key) : null; }
+
+/* ---------- canvas ---------- */
+const world=$("#world"), vp=$("#vp"), stage=$("#stage");
+const boards=[];  // {id,title,g,x,y,w,h}
+function board(id,title,sub,x,y,w,h,opts={}){
+  const p=st.pos[id]; if(p){x=p[0];y=p[1];}
+  const g=el("g",{class:"board","data-id":id,transform:`translate(${x},${y})`},vp);
+  el("rect",{class:"board-bg",x:0,y:0,width:w,height:h,rx:10},g);
+  if(opts.tag){ const t=el("text",{class:"suku-tag",x:18,y:22},g); t.textContent=opts.tag; }
+  const tt=el("text",{class:"board-title",x:18,y:opts.tag?44:30},g); tt.textContent=title;
+  if(sub){ const s=el("text",{class:"board-sub",x:18,y:opts.tag?60:46},g); s.textContent=sub; }
+  const handle=el("rect",{class:"board-handle",x:0,y:0,width:w,height:opts.tag?66:52},g);
+  const b={id,title,g,x,y,w,h,handle}; boards.push(b);
+  handle.addEventListener("pointerdown",e=>startBoardDrag(e,b));
+  return b;
+}
+function applyView(){ const v=st.view; vp.setAttribute("transform",`translate(${v.x},${v.y}) scale(${v.k})`);
+  $("#notes").style.transform=`translate(${v.x}px,${v.y}px) scale(${v.k})`; $("#zpct").textContent=Math.round(v.k*100)+"%"; }
+function zoomAt(f,cx,cy){ const v=st.view; const nk=Math.max(.04,Math.min(12,v.k*f)); f=nk/v.k; v.x=cx-(cx-v.x)*f; v.y=cy-(cy-v.y)*f; v.k=nk; applyView(); }
+function fitRect(x,y,w,h,pad=40){ const r=stage.getBoundingClientRect(); const pr=(st.panel && r.width>760)? 380:0;
+  const aw=r.width-pr-pad*2, ah=r.height-pad*2; const k=Math.min(aw/w, ah/h, 3); st.view={k,x:pad+(aw-w*k)/2-x*k,y:pad+(ah-h*k)/2-y*k}; applyView(); }
+function fitBoards(list){ let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity; list.forEach(b=>{x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.w);y1=Math.max(y1,b.y+b.h);}); fitRect(x0,y0,x1-x0,y1-y0); }
+
+// pan / pinch / wheel
+const ptrs=new Map(); let pan=null, pinch=null, moved=false;
+stage.addEventListener("pointerdown",e=>{
+  if(e.target.closest(".panel,.legend,.zoomer,.note")) return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=false;
+  if(ptrs.size===1){ pan={x:e.clientX,y:e.clientY,vx:st.view.x,vy:st.view.y}; }
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch={d:Math.hypot(a.x-b.x,a.y-b.y),k:st.view.k}; pan=null; }
+});
+window.addEventListener("pointermove",e=>{
+  if(dragB) return moveBoardDrag(e);
+  if(dragN) return moveNoteDrag(e);
+  if(!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch && ptrs.size===2){ const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y); const r=stage.getBoundingClientRect();
+    zoomAt((pinch.k*d/pinch.d)/st.view.k,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top); moved=true; return; }
+  if(pan){ const dx=e.clientX-pan.x, dy=e.clientY-pan.y; if(Math.abs(dx)+Math.abs(dy)>4){ moved=true; stage.classList.add("panning"); }
+    if(moved){ st.view.x=pan.vx+dx; st.view.y=pan.vy+dy; applyView(); } }
+});
+const endPtr=e=>{ if(dragB) endBoardDrag(); if(dragN) endNoteDrag(); ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null; if(!ptrs.size){ pan=null; stage.classList.remove("panning"); } };
+window.addEventListener("pointerup",endPtr); window.addEventListener("pointercancel",endPtr);
+stage.addEventListener("wheel",e=>{ if(e.target.closest(".panel,.legend")) return; e.preventDefault(); const r=stage.getBoundingClientRect();
+  const mouseWheel = e.deltaMode===1 || (e.deltaX===0 && Math.abs(e.deltaY)>=50 && Number.isInteger(e.deltaY));
+  if(e.ctrlKey||e.metaKey||mouseWheel){ zoomAt(Math.exp(-e.deltaY*(e.ctrlKey?.01:e.deltaMode===1?.05:.0018)),e.clientX-r.left,e.clientY-r.top); }
+  else { st.view.x-=e.deltaX; st.view.y-=e.deltaY; applyView(); } },{passive:false});
+world.addEventListener("click",e=>{ if(moved) return; if(e.target===world||e.target.classList.contains("board-bg")){ clearSel(); } });
+
+// board dragging
+let dragB=null;
+function startBoardDrag(e,b){ e.stopPropagation(); dragB={b,sx:e.clientX,sy:e.clientY,x:b.x,y:b.y}; }
+function moveBoardDrag(e){ const d=dragB, k=st.view.k; d.b.x=d.x+(e.clientX-d.sx)/k; d.b.y=d.y+(e.clientY-d.sy)/k; d.b.g.setAttribute("transform",`translate(${d.b.x},${d.b.y})`); }
+function endBoardDrag(){ const b=dragB.b; if(b.x!==dragB.x||b.y!==dragB.y){ st.pos[b.id]=[Math.round(b.x),Math.round(b.y)]; store.set("pos",st.pos);} dragB=null; }
+
+/* ---------- selection ---------- */
+function setSel(types, additive){ if(!additive) st.sel.clear(); types.forEach(t=> (additive && st.sel.has(t) && types.length===1) ? st.sel.delete(t) : st.sel.add(t)); st.cell=null; renderSel(); }
+function clearSel(){ st.sel.clear(); st.cell=null; renderSel(); }
+function renderSel(){
+  world.classList.toggle("has-sel", st.sel.size>0 || !!st.cell);
+  world.classList.toggle("isolate", st.isolate && (st.sel.size>0||!!st.cell));
+  document.querySelectorAll(".sel-able").forEach(n=>{
+    const t=n.getAttribute("data-type"); let on=st.sel.has(t);
+    if(st.cell){ const cs=n.getAttribute("data-cells"); on = on || (cs && cs.split(" ").includes(st.cell)); }
+    n.classList.toggle("sel",on);
+  });
+  document.querySelectorAll(".cellhi").forEach(n=>n.remove());
+  if(st.cell){ const [i,j]=st.cell.split(",").map(Number); const [x0,x1]=cellB(i),[y0,y1]=cellB(j);
+    document.querySelectorAll("g.plan-geo").forEach(g=>el("rect",{class:"cellhi",x:x0,y:y0,width:x1-x0,height:y1-y0},g)); }
+  $("#isoBtn").classList.toggle("on",st.isolate); $("#isoBtn").setAttribute("aria-pressed",st.isolate);
+  renderLegend(); if(st.tab==="inspect") renderPanel();
+}
+
+/* ---------- tooltip ---------- */
+const tip=$("#tip");
+function showTip(e,html){ const r=stage.getBoundingClientRect(); tip.innerHTML=html; tip.hidden=false; tip.style.left=(e.clientX-r.left)+"px"; tip.style.top=(e.clientY-r.top)+"px"; }
+function hideTip(){ tip.hidden=true; }
+function roomTip(r){ const t=T(r.type); const ev=D.plans[r.house].elev; const e=ev&&ev[r.type]!==undefined? ` · floor ${ev[r.type]>=0?"+":""}${ev[r.type].toFixed(2)}`:"";
+  return `<b>${esc(t.name)}</b> · ${esc(t.gloss)}<br><span class="m">${esc(H[r.house].meta.name)} · depth ${r.depth??"–"} · ${r.area.toFixed(2)} mod² · ring ${r.ring}${e}</span>`; }
+function bindRoom(node,r){
+  node.addEventListener("pointerenter",e=>showTip(e,roomTip(r)));
+  node.addEventListener("pointermove",e=>showTip(e,roomTip(r)));
+  node.addEventListener("pointerleave",hideTip);
+  node.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); st.focusRoom=r.id; setSel([r.type], e.shiftKey||e.metaKey); if(!st.panel) togglePanel(true); setTab("inspect"); });
+}
+
+/* ---------- drawing a plan ---------- */
+const PB={x0:-2.75,y0:-2.95,x1:5.75,y1:5.65};   // shared frame so every card is at the same scale
+function drawPlan(parent,h,ox,oy,opts={}){
+  const g=el("g",{class:"plan-geo",transform:`translate(${ox},${oy}) scale(${S})`},parent);
+  const lay=st.layers;
+  const fills=el("g",{class:"L-fills"},g), links=el("g",{class:"L-links"},g), grid=el("g",{class:"L-grid"},g), ink=el("g",{class:"L-ink"},g), cols=el("g",{class:"L-cols"},g), labs=el("g",{class:"L-labels"},g), olabs=el("g",{class:"L-olabels"},g);
+  H[h].rooms.forEach(r=>{
+    const p=el("path",{class:"room sel-able",d:"M"+r.poly.map(q=>q.join(" ")).join("L")+"Z","data-type":r.type,"data-room":r.id,"data-cells":cellList(r)},fills);
+    p.__room=r; bindRoom(p,r);
+    const t=el("text",{class:"rlabel sel-able","data-type":r.type,"data-cells":cellList(r),x:r.anchor[0],y:r.anchor[1]},labs); const nm=T(r.type).name;
+    const fs=Math.min(.17, Math.max(.085, r.inset*.62)); t.style.fontSize=fs+"px"; t.style.strokeWidth=(fs*.25)+"px";
+    const words=nm.split(" "); if(words.length>1 && nm.length*fs*.5>Math.min(r.bbox[2]-r.bbox[0],1.3)){ const mid=Math.ceil(words.length/2);
+      [words.slice(0,mid).join(" "),words.slice(mid).join(" ")].forEach((w,i)=>{ const s=el("tspan",{x:r.anchor[0],dy:i?fs*1.05:-fs*.5},t); s.textContent=w; }); } else t.textContent=nm;
+  });
+  el("path",{class:"ink",d:H[h].P.lines},ink); el("path",{class:"inkfill",d:H[h].P.fills},ink);
+  H[h].P.cols.forEach(([x,y,big])=>el("circle",{class:"col"+(isMain(x,y)?" main":""),cx:x,cy:y,r:isMain(x,y)?.055:.03},cols));
+  CL.forEach(v=>{ el("line",{class:"modgrid",x1:v,y1:-.3,x2:v,y2:5.5},grid); el("line",{class:"modgrid",x1:-.3,y1:v,x2:5.5,y2:v},grid); });
+  const rs=H[h].rooms; H[h].P.links.forEach(l=>{ if(l.kind==="wall") return; const a=rs[l.a].anchor,b=rs[l.b].anchor;
+    el("line",{class:l.kind==="door"?"link-door":"link-open",x1:a[0],y1:a[1],x2:b[0],y2:b[1]},links); });
+  H[h].P.labels.forEach(L=>{ const t=el("text",{class:"olabel",x:L.x,y:L.y,transform:L.rot?`rotate(90 ${L.x} ${L.y})`:""},olabs); t.textContent=L.t; });
+  applyLayers(g); return g;
+}
+const cellList=r=>Object.keys(r.cells).filter(k=>r.cells[k]>40).join(" ");
+const isMain=(x,y)=> [2,3.2].some(a=>Math.abs(x-a)<.12) && [2,3.2].some(b=>Math.abs(y-b)<.12);
+function applyLayers(root=vp){ const L=st.layers;
+  root.querySelectorAll(".L-ink").forEach(n=>n.style.display=L.ink?"":"none");
+  root.querySelectorAll(".L-fills .room").forEach(n=>n.style.fillOpacity=L.fills?1:0);
+  root.querySelectorAll(".L-labels").forEach(n=>n.style.display=L.labels?"":"none");
+  root.querySelectorAll(".L-olabels").forEach(n=>n.style.display=L.olabels?"":"none");
+  root.querySelectorAll(".L-cols").forEach(n=>n.style.display=L.cols?"":"none");
+  root.querySelectorAll(".L-grid").forEach(n=>n.style.display=L.grid?"":"none");
+  root.querySelectorAll(".L-links").forEach(n=>n.style.display=L.links?"":"none"); }
+function recolor(){ document.querySelectorAll(".room, .node").forEach(n=>{ const r=n.__room; if(r) n.style.fill=roomColor(r); });
+  document.querySelectorAll(".ovl").forEach(n=>{ n.style.fill=roomColor(n.__room); });
+  drawConsensus(); renderLegend(); }
+
+/* ---------- layout ---------- */
+const CW=Math.round((PB.x1-PB.x0)*S)+36, CH=Math.round((PB.y1-PB.y0)*S)+96;
+const GAP=46, ROW_A=0, ROW_B=CH+170, VS_H=900, ROW_C=ROW_B+VS_H+170, GR_H=380;
+const colX=i=> i*(CW+GAP) + (i>=4?60:0) + (i>=6?60:0);
+function rowTitle(txt,sub,x,y){ const t=el("text",{class:"row-title",x,y},vp); t.textContent=txt; const s=el("text",{class:"row-sub",x,y:y+26},vp); s.textContent=sub; }
+
+function build(){
+  vp.innerHTML=""; boards.length=0;
+  rowTitle("Horizontal · Lantai 1 (Padua Uma)","Ground floor plans traced from Tabel 2, normalised to the column module. Front terrace at the bottom in every house.",0,-60);
+  HOUSES.forEach((h,i)=>{
+    const b=board("plan-"+h.key,h.name+(h.alt?" · "+h.alt:""),`${H[h.key].rooms.length} spaces · drawn bay ≈ ${D.plans[h.key].bay} pt · mean depth ${H[h.key].meanDepth.toFixed(2)}`,colX(i),ROW_A,CW,CH,{tag:"Suku "+h.suku});
+    drawPlan(b.g,h.key,18-PB.x0*S,78-PB.y0*S);
+    const cap=el("text",{class:"board-cap",x:18,y:CH-14},b.g); cap.textContent=h.roof+" · "+h.floor;
+  });
+  rowTitle("Vertical · three worlds","Exploded stack per house: Lubu Penang (below), Padua Uma (human), Hedang → Umadalu → Jaga Wogu (ancestors). Upper plans aligned on the four main pillars.",0,ROW_B-60);
+  HOUSES.forEach((h,i)=>drawStack(h,colX(i),ROW_B));
+  rowTitle("Access graphs","Justified graphs rooted at Baga Haga Uma. Solid = door found in the drawing, dashed = open floor or open terrace.",0,ROW_C-60);
+  HOUSES.forEach((h,i)=>drawGraph(h,colX(i),ROW_C));
+  // analysis column on the left
+  const AX=-1620;
+  rowTitle("Cross-reading","Boards that compare all eight houses at once.",AX,-60);
+  drawConsensusBoard(AX,ROW_A);
+  drawOverlayBoard(AX+800,ROW_A);
+  drawMatrixBoard(AX,ROW_B+40);
+  drawSectionsBoard(AX,ROW_B+660);
+  drawFindingsBoard(AX,ROW_B+1360);
+  drawSimilarityBoard(AX,ROW_B+2060);
+  recolor(); renderSel(); fillGoto();
+}
+
+/* ---------- vertical stack (axonometric) ---------- */
+const ISO_K=S*.6, C30=Math.cos(Math.PI/6), S30=.5;
+const iso=(x,y)=>[(x-y)*C30*ISO_K,(x+y)*S30*ISO_K];
+const LV=[{z:0,key:"lubu",name:"Lubu Penang",sub:"Level 1 · alam bawah · livestock, timber, firewood",c:"--lv0"},
+          {z:130,key:"padua",name:"Padua Uma",sub:"Level 2 · alam tengah · human world",c:"--lv1"},
+          {z:300,key:"rak1",name:"Hedang",sub:"Level 3a · rack · utensils, ready food",c:"--lv2"},
+          {z:420,key:"rak2",name:"Umadalu",sub:"Level 3b · loft · personal goods, gong, mats",c:"--lv3"},
+          {z:540,key:"jaga",name:"Umadalu Jaga Wogu",sub:"Level 3c · alam atas · heirlooms, seed grain",c:"--lv4"}];
+function drawStack(h,x,y){
+  const b=board("stack-"+h.key,h.name,h.roof,x,y,CW,VS_H,{tag:"Suku "+h.suku});
+  const ox=CW/2+30, base=VS_H-150;
+  const g=el("g",{transform:`translate(${ox},${base})`},b.g);
+  const M=`matrix(${C30*ISO_K},${S30*ISO_K},${-C30*ISO_K},${S30*ISO_K},0,0)`;
+  const hk=H[h.key]; const hasJ=!!hk.upper.jaga;
+  const sq="M0 0H5.2V5.2H0Z";
+  // pillars behind
+  const drawPillars=(from,to,cls)=>{ [[2,2],[3.2,2],[2,3.2],[3.2,3.2]].forEach(([px,py])=>{ const [sx,sy]=iso(px,py); el("line",{class:cls,x1:sx,y1:sy-from,x2:sx,y2:sy-to},g); }); };
+  LV.forEach((L,li)=>{
+    if(L.key==="jaga" && !hasJ) return;
+    const lg=el("g",{transform:`translate(0,${-L.z})`},g);
+    const m=el("g",{transform:M},lg);
+    el("path",{d:sq,style:`fill:var(${L.c});fill-opacity:.22;stroke:var(${L.c});stroke-width:1.2;vector-effect:non-scaling-stroke`},m);
+    if(L.key==="lubu"){ hk.P.cols.forEach(([cx,cy])=>{ const [sx,sy]=iso(cx,cy); el("line",{class:"stilt",x1:sx,y1:sy,x2:sx,y2:sy-LV[1].z},g); el("circle",{cx:cx,cy:cy,r:.05,style:"fill:var(--ink-3)"},m); }); }
+    if(L.key==="padua"){ hk.rooms.forEach(r=>{ const p=el("path",{class:"room sel-able",d:"M"+r.poly.map(q=>q.join(" ")).join("L")+"Z","data-type":r.type,"data-cells":cellList(r)},m); p.__room=r; bindRoom(p,r); });
+      el("path",{class:"ink",d:hk.P.lines,style:"opacity:.35"},m); }
+    if(["rak1","rak2","jaga"].includes(L.key)){ const u=hk.upper[L.key]; if(u){
+        const ug=el("g",{transform:`translate(${u.tx},${u.ty}) scale(${u.sx},${u.sy})`},m); el("path",{class:"ink",d:u.path},ug);
+        u.labels.forEach(lb=>{ const t=labelType(lb.t); if(!t) return; const [sx,sy]=iso(lb.x,lb.y); const c=el("g",{class:"chip-u sel-able","data-type":t,transform:`translate(${sx},${sy})`},lg);
+          const w=T(t).name.length*5.1+12; el("rect",{x:-w/2,y:-9,width:w,height:16,rx:8,style:`fill:var(${L.c})`},c); const tx=el("text",{x:0,y:3,"text-anchor":"middle"},c); tx.textContent=T(t).name;
+          c.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); setSel([t],e.shiftKey||e.metaKey); setTab("inspect"); });
+          c.addEventListener("pointerenter",e=>showTip(e,`<b>${esc(T(t).name)}</b> · ${esc(T(t).gloss)}<br><span class="m">${esc(h.name)} · drawn label “${esc(lb.t)}”${lb.t.match(/[+-]\d/)?"":""}</span>`)); c.addEventListener("pointerleave",hideTip); });
+    } }
+    // level label at left
+    const ly=-10; const tl=el("text",{class:"lvl-label",x:-CW/2+30,y:ly-L.z+4},g); tl.textContent=L.name;
+    const ts=el("text",{class:"lvl-sub",x:-CW/2+30,y:ly-L.z+18},g); ts.textContent=L.sub.split(" · ")[0]+" · "+L.sub.split(" · ")[1];
+    if(li<LV.length-1) drawPillars(L.z, (LV[li+1].key==="jaga"&&!hasJ)? L.z+60 : LV[li+1].z, "pillar");
+  });
+  if(!hasJ){ const t0=el("text",{class:"lvl-label",x:-CW/2+30,y:-10-LV[4].z+4,style:"fill:var(--ink-3)"},g); t0.textContent="Umadalu Jaga Wogu"; const t=el("text",{class:"lvl-sub",x:-CW/2+30,y:-10-LV[4].z+18},g); t.textContent="No Jaga Wogu: hipped roof, no tower"; }
+  if(h.key==="kedabura"){ const t=el("text",{class:"lvl-sub",x:-CW/2+30,y:-LV[4].z-50},g); t.textContent="Drawn elevations: Hedang +2.00 · Umadalu +2.60 · Jaga Wogu +3.00"; }
+}
+
+/* ---------- justified graph ---------- */
+function drawGraph(h,x,y){
+  const hk=H[h.key]; const b=board("graph-"+h.key,h.name,`mean depth ${hk.meanDepth.toFixed(2)} · max ${Math.max(...hk.rooms.map(r=>r.depth||0))}`,x,y,CW,GR_H,{tag:"Access graph"});
+  const g=el("g",{transform:`translate(0,90)`},b.g);
+  const maxD=Math.max(...hk.rooms.map(r=>r.depth||0)); const rowH=Math.min(46,(GR_H-120)/Math.max(1,maxD));
+  const byD={}; hk.rooms.forEach((r,i)=>{ (byD[r.depth]=byD[r.depth]||[]).push(i); });
+  const pos={}; for(const d in byD){ const arr=byD[d].sort((a,b)=>hk.rooms[a].anchor[0]-hk.rooms[b].anchor[0]); arr.forEach((i,k)=>{ pos[i]=[40+(CW-80)*(k+.5)/arr.length, d*rowH]; }); }
+  for(let d=0; d<=maxD; d++){ el("line",{class:"gline",x1:20,y1:d*rowH,x2:CW-20,y2:d*rowH},g); const t=el("text",{class:"dlabel",x:22,y:d*rowH-4},g); t.textContent=d; }
+  hk.P.links.forEach(l=>{ if(l.kind==="wall") return; const a=pos[l.a],c=pos[l.b]; el("line",{class:l.kind==="door"?"link-door":"link-open",x1:a[0],y1:a[1],x2:c[0],y2:c[1]},g); });
+  hk.rooms.forEach((r,i)=>{ const [px,py]=pos[i]; const n=el("circle",{class:"node sel-able",cx:px,cy:py,r:7,"data-type":r.type},g); n.__room=r; bindRoom(n,r);
+    const t=el("text",{class:"nlabel",x:px,y:py+17},g); t.textContent=T(r.type).name.replace("Korung ","K. "); });
+}
+
+/* ---------- consensus board ---------- */
+let consG=null, consB=null;
+function drawConsensusBoard(x,y){ consB=board("consensus","Module consensus","Dominant space in each structural cell, across 8 houses",x,y,760,CH,{tag:"Derived"}); consG=el("g",{transform:"translate(40,96)"},consB.g);
+  const c=el("text",{class:"board-cap",x:18,y:CH-14},consB.g); c.textContent="Click a cell to highlight that position in every plan. Dots = the 8 houses, in row order."; }
+function drawConsensus(){ if(!consG) return; consG.innerHTML="";
+  const U=52, ox=3*U, oy=3*U;   // cells -3..5
+  for(let i=-3;i<=5;i++) for(let j=-3;j<=5;j++){
+    const key=i+","+j; const counts={}; let any=0;
+    HOUSES.forEach(h=>{ const t=H[h.key].cellType[key]; if(t){ counts[t]=(counts[t]||0)+1; any++; } });
+    if(!any) continue;
+    const [x0,x1]=cellB(i),[y0,y1]=cellB(j); const X=ox+x0*U, Y=oy+y0*U, W=(x1-x0)*U, Hh=(y1-y0)*U;
+    let bt=null,bv=0; for(const t in counts) if(counts[t]>bv){bv=counts[t];bt=t;}
+    let col;
+    if(st.lens==="ring") col=LENSES.ring.color(ringOf(i,j));
+    else if(st.lens==="depth"){ const ds=HOUSES.map(h=>H[h.key].cellRoom[key]).filter(Boolean).map(r=>r.depth||0); col=LENSES.depth.color(Math.round(ds.reduce((a,b)=>a+b,0)/ds.length)); }
+    else col=LENSES[st.lens].color(attr(bt,LENSES[st.lens].key));
+    const r=el("rect",{class:"cell sel-able",x:X,y:Y,width:W,height:Hh,"data-type":bt,style:`fill:${col};fill-opacity:${.25+.75*bv/8}`},consG);
+    r.addEventListener("click",e=>{ if(moved) return; e.stopPropagation(); st.sel.clear(); st.cell = st.cell===key? null : key; renderSel(); setTab("inspect"); });
+    r.addEventListener("pointerenter",e=>showTip(e,`<b>Cell ${i},${j}</b> · ring ${ringOf(i,j)}<br>`+Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`${esc(T(t).name)} <span class="m">${n}/8</span>`).join("<br>")));
+    r.addEventListener("pointerleave",hideTip);
+    const tt=el("text",{class:"cell-t",x:X+W/2,y:Y+Hh/2-4},consG); const nm=T(bt).name.replace("Korung ","K. ").replace("Baga ","B. ").replace("Kapenang ","Kap. "); tt.textContent=nm.length>11&&W<60? nm.slice(0,10)+"…":nm;
+    const tn=el("text",{class:"cell-n",x:X+W/2,y:Y+Hh/2+9},consG); tn.textContent=bv+"/8";
+    HOUSES.forEach((h,k)=>{ const t=H[h.key].cellType[key]; el("circle",{cx:X+W/2-15.75+k*4.5,cy:Y+Hh-8,r:1.9,style:`fill:${t? (t===bt?"var(--ink)":"var(--accent)") : "var(--rule)"}`},consG); });
+  }
+  // pillar markers
+  [[2,2],[3.2,2],[2,3.2],[3.2,3.2]].forEach(([a,b])=>el("circle",{cx:ox+a*U,cy:oy+b*U,r:5,style:"fill:var(--accent)"},consG));
+  const lab=el("text",{class:"board-sub",x:ox+2.6*U,y:oy+5.2*U+22,"text-anchor":"middle"},consG); lab.textContent="▲ front (Baga Haga Uma)";
+}
+
+/* ---------- overlay board ---------- */
+function drawOverlayBoard(x,y){ const b=board("overlay","Superimposed plans","All 8 plans stacked on the same module grid",x,y,CW+120,CH,{tag:"Derived"});
+  const g=el("g",{transform:`translate(${78-PB.x0*S},${78-PB.y0*S}) scale(${S})`},b.g);
+  HOUSES.forEach(h=>H[h.key].rooms.forEach(r=>{ const p=el("path",{class:"room ovl sel-able",d:"M"+r.poly.map(q=>q.join(" ")).join("L")+"Z","data-type":r.type,"data-cells":cellList(r),style:"fill-opacity:.14;stroke-opacity:.25"},g); p.__room=r; bindRoom(p,r); }));
+  CL.forEach(v=>{ el("line",{class:"modgrid",x1:v,y1:-.3,x2:v,y2:5.5},g); el("line",{class:"modgrid",x1:-.3,y1:v,x2:5.5,y2:v},g); });
+  [[2,2],[3.2,2],[2,3.2],[3.2,3.2]].forEach(([a,c])=>el("circle",{class:"col main",cx:a,cy:c,r:.07},g));
+  const c=el("text",{class:"board-cap",x:18,y:CH-14},b.g); c.textContent="Overlap builds colour: dense tone = the same kind of space at the same place in many houses.";
+}
+
+/* ---------- vertical matrix ---------- */
+function drawMatrixBoard(x,y){
+  const rows=[["Lubu Penang","kolong · level 1",h=>true],["Padua Uma floor","level 2",h=>true],
+    ["Hedang","rack level 1",h=>H[h].utypes.has("hedang")],["Hedang Korung","rack over rooms",h=>H[h].utypes.has("hedang_korung")],
+    ["Umadalu Korung","loft level 2",h=>H[h].utypes.has("umadalu_korung")],["Umadalu Padua Uma","loft over core",h=>H[h].utypes.has("umadalu_padua_uma")],
+    ["Umadalu Jaga Wogu","tower attic · level 3",h=>H[h].utypes.has("umadalu_jaga_wogu")],
+    ["Centre-bay use","what sits between the 4 pillars",null],["Kitchen position","",null],["Anakajaka count","",null]];
+  const W=1520, rh=40, top=110, lw=260, cw=(W-lw-40)/8;
+  const b=board("vmatrix","Vertical & structural matrix","Presence read from the upper-level drawings (Tabel 2) and ground plans",x,y,W,top+rows.length*rh+50,{tag:"Derived"});
+  HOUSES.forEach((h,k)=>{ const t=el("text",{class:"mtx-h",x:lw+cw*(k+.5),y:top-16},b.g); t.textContent=h.name; const s=el("text",{class:"mtx-rs",x:lw+cw*(k+.5),y:top-4,"text-anchor":"middle"},b.g); s.textContent=h.suku; });
+  rows.forEach((r,ri)=>{ const yy=top+ri*rh; el("line",{class:"gline",x1:18,y1:yy,x2:W-18,y2:yy},b.g);
+    const t=el("text",{class:"mtx-r",x:18,y:yy+18},b.g); t.textContent=r[0]; const s=el("text",{class:"mtx-rs",x:18,y:yy+31},b.g); s.textContent=r[1];
+    HOUSES.forEach((h,k)=>{ const cx=lw+cw*(k+.5), cy=yy+rh/2;
+      if(r[2]){ const on=r[2](h.key); const lvc=ri<2?`var(--lv${ri})`:ri>=6?"var(--lv4)":"var(--lv2)";
+        el("rect",{x:cx-cw/2+6,y:yy+6,width:cw-12,height:rh-12,rx:5,style:on?`fill:${lvc}`:"fill:none;stroke:var(--rule);stroke-dasharray:3 3"},b.g);
+        const tt=el("text",{class:"cell-n",x:cx,y:cy+4},b.g); tt.textContent=on?"present":"—"; }
+      else { let v=""; const hk=H[h.key];
+        if(ri===7){ v=T(hk.cellType["2,2"]).name; } if(ri===8){ v= hk.rooms.some(q=>q.type==="kapenang_karabuk")?"centre (hearth)": hk.rooms.some(q=>q.type==="dapur")?"inside, rear-left":"separate annex"; }
+        if(ri===9){ v=hk.rooms.filter(q=>q.type==="ana_kajaka").length+""; }
+        const tt=el("text",{class:"cell-t",x:cx,y:cy+4},b.g); tt.textContent=v; }
+    });
+  });
+}
+
+/* ---------- sections board ---------- */
+function drawSectionsBoard(x,y){ const W=1520, b=board("sections","Sections · Tabel 3","Original cross-sections from the paper (raster, as published)",x,y,W,640,{tag:"Source"});
+  HOUSES.forEach((h,k)=>{ const col=k%4,row=Math.floor(k/4); const X=18+col*(W-36)/4, Y=90+row*270;
+    const im=el("image",{href:D.sections[h.section],x:X,y:Y,width:(W-36)/4-14,height:230,preserveAspectRatio:"xMidYMid meet"},b.g);
+    const t=el("text",{class:"mtx-h",x:X+((W-36)/4-14)/2,y:Y+250},b.g); t.textContent=h.name+" · "+h.roof; });
+  const c=el("text",{class:"board-cap",x:18,y:626},b.g); c.textContent="Colours in the source: green = Lubu Penang, yellow = Padua Uma, pink = upper storage levels.";
+}
+
+/* ---------- similarity ---------- */
+function sim(a,b){ const A=H[a].cellType,B=H[b].cellType; const keys=new Set([...Object.keys(A),...Object.keys(B)].filter(k=>{const [i,j]=k.split(",").map(Number); return i>=0&&i<=4&&j>=0&&j<=4;}));
+  let same=0; keys.forEach(k=>{ if(A[k]&&A[k]===B[k]) same++; }); return keys.size? same/keys.size : 0; }
+function drawSimilarityBoard(x,y){ const n=HOUSES.length, c=62, lw=120, top=120; const W=lw+n*c+60, Hh=top+n*c+70;
+  const b=board("similarity","Layout similarity","Share of the 25 structural cells holding the same space type",x,y,W,Hh,{tag:"Derived"});
+  HOUSES.forEach((h,i)=>{ const t=el("text",{class:"mtx-r",x:lw-8,y:top+i*c+c/2+4,"text-anchor":"end"},b.g); t.textContent=h.name;
+    const t2=el("text",{class:"mtx-h",x:lw+i*c+c/2,y:top-12,transform:`rotate(-35 ${lw+i*c+c/2} ${top-12})`,"text-anchor":"start"},b.g); t2.textContent=h.name;
+    HOUSES.forEach((g,j)=>{ const v=sim(h.key,g.key); const X=lw+j*c, Y=top+i*c;
+      const r=el("rect",{x:X+1,y:Y+1,width:c-2,height:c-2,rx:4,style:`fill:var(--indigo);fill-opacity:${i===j?.06:(.08+.9*Math.max(0,(v-.3)/.7))}`},b.g);
+      r.addEventListener("pointerenter",e=>showTip(e,`<b>${esc(h.name)} ↔ ${esc(g.name)}</b><br><span class="m">${Math.round(v*100)}% of cells match</span>`)); r.addEventListener("pointerleave",hideTip);
+      const tt=el("text",{class:"cell-n",x:X+c/2,y:Y+c/2+4,style:v>.75&&i!==j?"fill:var(--sheet)":""},b.g); tt.textContent=i===j?"—":Math.round(v*100); }); });
+  const cap=el("text",{class:"board-cap",x:18,y:Hh-16},b.g); cap.textContent="Main 5 × 5 square only (kitchen annexes excluded). Values in %.";
+}
+
+/* ---------- findings board ---------- */
+function drawFindingsBoard(x,y){
+  const cnt=(t)=>HOUSES.filter(h=>H[h.key].rooms.some(r=>r.type===t)).length;
+  const centre=HOUSES.map(h=>T(H[h.key].cellType["2,2"]).name);
+  const halemaRight=HOUSES.filter(h=>{ const r=H[h.key].rooms.find(q=>q.type==="halema"); return r && r.bbox[2]>5.0; }).length;
+  const kerLeft=HOUSES.filter(h=>H[h.key].rooms.some(q=>q.type==="kerajialu" && q.bbox[0]<1.05)).length;
+  const inaCentre=HOUSES.filter(h=>H[h.key].cellType["2,3"]==="korung_ina_ama").length;
+  const front=HOUSES.map(h=>H[h.key].rooms.filter(q=>q.type==="ana_kajaka").length);
+  const F=[
+   ["new","One square grid for every house",`All 8 plans sit on a 6 × 6 column square: five bays each way, the middle bay about 1.2× wider and carried by the four thick main pillars. The front row of that square is the terrace. All the upper-level plans (Hedang, Umadalu, Jaga Wogu) land on the same square when aligned on those pillars.`],
+   ["new","The centre changed use",`Between the four main pillars: ${centre.map((c,i)=>HOUSES[i].name+" = "+c).join("; ")}. Only Uma Bakul keeps the hearth there. In the others the kitchen left and a communal floor took the centre.`],
+   ["new","Left / right is gendered too",`Kerajialu runs down the left-hand column in ${kerLeft}/8 plans. Halema occupies the right-hand column in ${halemaRight}/8. So the paper's front/side/inner order also has a consistent left (women's work) / right (family platforms) axis.`],
+   ["new","Front row is always five bays",`Anakajaka per house: ${front.join(", ")}. Where there is only one, the Baga Haga Uma is extended over the empty bay. Terrace length and Anakajaka count trade off inside the same five-bay row.`],
+   ["new","Parents' room sits on the axis",`Korung Ina-Ama takes the cell directly in front of the centre bay in ${inaCentre}/8 houses. That is on the main pillar axis, next to the front wall, and reached through the main floor. In the drawings it is shallow (depth 2–3), which the text's “deepest room” reading does not quite fit.`],
+   ["bad","Extra rooms: text vs drawings","Section E of the text lists extra korung in Uma Adung, Ladu Baru and Uma Djaga. The drawings show them only in Uma Adung and Ladu Baru. Uma Djaga has the basic two rooms."],
+   ["bad","Anakajaka Kerajialu is not in the plans","The text says it is in five houses and missing in Kedabura, Uma Adung and Uma Nuku. No plan uses that label. “Kapenang Kerajialu” appears in Kedabura, Kedakadi, Uma Djaga and Uma Nuku, which does not match either list."],
+   ["bad","Kitchen annex count","Section F lists four separate kitchens (Kedakadi, Uma Wajal, Uma Adung, Uma Nuku). The earlier paragraph and the plans add Ladu Baru, so five."],
+   ["ok","Halema is universal",`Halema appears in ${cnt("halema")}/8 plans, always as an L. The diagonal line at the L's corner is drawn in the six joglo-roof houses and missing in Uma Wajal and Uma Adung, the two hipped-roof houses. Worth checking whether it marks a roof element.`],
+   ["ok","Jaga Wogu follows the roof",`Six houses have Umadalu Jaga Wogu. Uma Wajal and Uma Adung (perisai roof) have none. So the vertical three-world stack is complete only under the joglo tower.`],
+   ["ok","Twins across clans","Uma Adung (Anakalang) and Ladu Baru (Kedamaki) are almost cell-for-cell identical. So are Kedabura (Anakalang) and Uma Djaga (Hawu). Layout type seems to cut across suku lines. Compare them in the overlay board."]
+  ];
+  const W=1520, colW=(W-54)/3, b=board("findings","Re-reading notes","Observations computed from the traced drawings + checks against the paper's text",x,y,W,640,{tag:"Findings"});
+  F.forEach((f,i)=>{ const col=i%3,row=Math.floor(i/3); const fo=el("foreignObject",{x:18+col*(colW+9),y:84+row*138,width:colW,height:134},b.g);
+    const tag={new:["new","Derived pattern"],bad:["bad","Text ≠ drawing"],ok:["ok","Consistent"]}[f[0]];
+    fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" class="fo-text"><h4><span class="tag ${tag[0]}">${tag[1]}</span>${esc(f[1])}</h4><p>${esc(f[2])}</p></div>`; });
+}
+
+/* ---------- legend ---------- */
+function renderLegend(){ const L=LENSES[st.lens]; const lg=$("#legend");
+  let items=L.vals.map(v=>{ const types= L.key? Object.keys(TYPES).filter(t=>attr(t,L.key)===v && !TYPES[t].level) : [];
+    const on = types.length && types.every(t=>st.sel.has(t));
+    return `<button class="lg" data-v="${v}" aria-pressed="${on}" ${L.key?"":"disabled"}><i style="background:${L.color(v)}"></i>${esc(L.name(v))}</button>`; }).join("");
+  lg.innerHTML=`<div class="lab">${esc(L.label)} lens</div><div class="items">${items}</div>${L.hint?`<div class="hint">${esc(L.hint)}</div>`:""}<div class="hint">Click a room: highlight that type in all houses. Shift-click to add. I = isolate, Esc = clear.</div>`;
+  lg.querySelectorAll(".lg").forEach(bn=>bn.addEventListener("click",e=>{ const v=isNaN(+bn.dataset.v)?bn.dataset.v:+bn.dataset.v;
+    const types=Object.keys(TYPES).filter(t=>attr(t,L.key)===v); setSel(types, e.shiftKey||e.metaKey); }));
+}
+function renderLens(){ $("#lens").innerHTML=Object.entries(LENSES).map(([k,L])=>`<button data-l="${k}" aria-pressed="${k===st.lens}">${L.label}</button>`).join("");
+  $("#lens").querySelectorAll("button").forEach(b=>b.onclick=()=>{ st.lens=b.dataset.l; store.set("lens",st.lens); renderLens(); recolor(); }); }
+
+/* ---------- panel ---------- */
+function togglePanel(on){ st.panel = on??!st.panel; $("#panel").hidden=!st.panel; $("#panelBtn").setAttribute("aria-pressed",st.panel); $("#panelBtn").classList.toggle("on",st.panel); }
+function setTab(t){ st.tab=t; ["inspect","layers","code","notes"].forEach(k=>$("#tab-"+k).setAttribute("aria-selected",k===t)); renderPanel(); }
+function renderPanel(){ const P=$("#pbody");
+  if(st.tab==="inspect") P.innerHTML=inspectHTML();
+  if(st.tab==="layers") P.innerHTML=layersHTML();
+  if(st.tab==="code") P.innerHTML=codeHTML();
+  if(st.tab==="notes") P.innerHTML=notesHTML();
+  bindPanel(); }
+function inspectHTML(){
+  if(st.cell){ const [i,j]=st.cell.split(",").map(Number);
+    return `<div class="gloss">Structural cell ${i}, ${j} · ring ${ringOf(i,j)}</div><h2>Same position, eight houses</h2><p>What each house puts in this bay of the column grid.</p>
+    <table class="t"><tr><th>House</th><th>Space</th></tr>${HOUSES.map(h=>{ const t=H[h.key].cellType[st.cell]; return `<tr class="${t?"":"miss"}"><td>${esc(h.name)}</td><td>${t?esc(T(t).name):"— (empty / outside)"}</td></tr>`; }).join("")}</table>`; }
+  if(!st.sel.size) return `<h2>Eight houses, one grid</h2><p>This workspace re-draws the plans of the paper by Solissa &amp; Pekulimu (Langkau Betang 13(1), CC BY 4.0) as clickable, comparable geometry.</p>
+    <h3>Try</h3><p>• Click <b>Halema</b> in any plan to see it light up in all eight, in the stacks, the graphs and the overlay.<br>• Switch the lens to <b>Ring</b> or <b>Depth</b> for the derived readings.<br>• Click a cell in <b>Module consensus</b> to compare one grid position.<br>• Drag a board by its title to rearrange. Press <b>N</b> for a note.</p>
+    <h3>Houses</h3><table class="t"><tr><th>House</th><th>Suku</th><th class="n">Spaces</th><th class="n">Mean depth</th></tr>${HOUSES.map(h=>`<tr><td><a href="#" data-fly="plan-${h.key}">${esc(h.name)}</a></td><td>${esc(h.suku)}</td><td class="n">${H[h.key].rooms.length}</td><td class="n">${H[h.key].meanDepth.toFixed(2)}</td></tr>`).join("")}</table>
+    <h3>Method</h3><p>Room outlines were traced from the paper's vector drawings. Each plan was then warped onto a common grid by matching its six column lines to 0, 1, 2, 3.2, 4.2, 5.2 modules. Doors come from the door arcs in the drawings. Bale-bale floors and terraces count as open to each other. Real metric scale is not stated in the paper.</p>`;
+  const types=[...st.sel]; const t=types[0], m=T(t);
+  const rows=HOUSES.map(h=>{ const rs=H[h.key].rooms.filter(r=>r.type===t); const up=H[h.key].utypes.has(t);
+    if(!rs.length) return `<tr class="${up?"":"miss"}"><td>${esc(h.name)}</td><td colspan="4">${up?"present (upper level)":"absent"}</td></tr>`;
+    const a=rs.reduce((s,r)=>s+r.area,0); const dep=rs.map(r=>r.depth).join("/"); const cells=[...new Set(rs.flatMap(r=>Object.keys(r.cells).filter(k=>r.cells[k]>80)))].join(" ");
+    return `<tr><td>${esc(h.name)}</td><td class="n">${rs.length}</td><td class="n">${a.toFixed(2)}</td><td class="n">${dep}</td><td class="n" style="font-size:10.5px">${cells}</td></tr>`; }).join("");
+  const present=HOUSES.filter(h=>H[h.key].rooms.some(r=>r.type===t)||H[h.key].utypes.has(t)).length;
+  const ex = types.length>1? `<p class="gloss">+ ${types.length-1} more selected: ${types.slice(1).map(x=>esc(T(x).name)).join(", ")}</p>`:"";
+  return `<div class="gloss">${esc(m.gloss)}</div><h2>${esc(m.name)}</h2>${ex}<p>${esc(m.note||"")}</p>
+   <dl class="kv"><dt>Function</dt><dd>${esc(META.groups[attr(t,"group")]?.label||"")}</dd><dt>Zone</dt><dd>${esc(META.zones[attr(t,"zone")]?.label||"")}</dd><dt>Gender</dt><dd>${esc(META.genders[attr(t,"gender")]?.label||"")}</dd><dt>Sacred</dt><dd>${attr(t,"sacred")} / 3</dd><dt>Present</dt><dd>${present} of 8 houses</dd></dl>
+   <h3>Across the eight houses</h3><table class="t"><tr><th>House</th><th class="n">n</th><th class="n">mod²</th><th class="n">depth</th><th class="n">cells</th></tr>${rows}</table>
+   <p style="font-size:12px">mod² = area in structural modules (one bay squared). Cells are grid positions (column, row) with the front terrace in row 4.</p>`;
+}
+function layersHTML(){ const L=st.layers; const row=(k,lab,sub)=>`<label class="toggle"><input type="checkbox" id="ly-${k}" ${L[k]?"checked":""}> <span>${lab}<br><span style="color:var(--ink-3);font-size:11.5px">${sub}</span></span></label>`;
+  return `<h2>Layers</h2>${row("fills","Room fills","coloured by the current lens")}${row("ink","Traced linework","the original drawing, warped to the module grid")}${row("labels","Room names","clean labels at each room")}${row("olabels","Original labels","the text as placed in the source drawing")}${row("cols","Columns","main pillars in the accent colour")}${row("grid","Module grid","the six canonical column lines")}${row("links","Access links","door (solid) and open (dashed) connections")}
+  <h3>Workspace</h3><p><button class="btn" id="resetPos">Reset board positions</button></p>`; }
+function codeHTML(){ const opt=(obj,cur)=>Object.entries(obj).map(([k,v])=>`<option value="${k}" ${k===cur?"selected":""}>${esc(v.label)}</option>`).join("");
+  return `<h2>Codebook</h2><p>Re-code any space type. Every plan, stack, graph and the consensus board recolour straight away. Your changes stay in this browser.</p>
+  <p><button class="btn" id="cbReset">Reset to the paper's reading</button> <button class="btn" id="cbCopy">Copy as JSON</button></p>
+  ${Object.keys(TYPES).map(t=>`<div class="cb-row"><div class="nm"><span>${esc(T(t).name)}</span><span class="gloss" style="font-size:10.5px">${st.cb[t]?"edited":""}</span></div>
+   <div class="sel3"><select data-t="${t}" data-k="group" aria-label="Function">${opt(META.groups,attr(t,"group"))}</select><select data-t="${t}" data-k="zone" aria-label="Zone">${opt(META.zones,attr(t,"zone"))}</select><select data-t="${t}" data-k="gender" aria-label="Gender">${opt(META.genders,attr(t,"gender"))}</select><select data-t="${t}" data-k="sacred" aria-label="Sacred">${[0,1,2,3].map(v=>`<option ${v===attr(t,"sacred")?"selected":""}>${v}</option>`).join("")}</select></div></div>`).join("")}`; }
+function notesHTML(){ return `<h2>Notes</h2><p>Sticky notes live on the canvas. Press N or use “+ Note”. They stay in this browser.</p>
+  ${st.notes.length? `<table class="t">${st.notes.map((n,i)=>`<tr><td><a href="#" data-note="${i}">${esc((n.text||"(empty)").slice(0,60))}</a></td></tr>`).join("")}</table>`:`<p class="empty">No notes yet.</p>`}
+  <p><button class="btn" id="notesCopy">Copy notes + codebook as JSON</button></p>`; }
+function bindPanel(){ const P=$("#pbody");
+  P.querySelectorAll("[data-fly]").forEach(a=>a.onclick=e=>{ e.preventDefault(); const b=boards.find(x=>x.id===a.dataset.fly); if(b) fitBoards([b]); });
+  P.querySelectorAll("input[id^=ly-]").forEach(c=>c.onchange=()=>{ st.layers[c.id.slice(3)]=c.checked; store.set("layers",st.layers); applyLayers(); });
+  P.querySelectorAll("select[data-t]").forEach(s=>s.onchange=()=>{ const t=s.dataset.t,k=s.dataset.k; st.cb[t]=st.cb[t]||{}; st.cb[t][k]= k==="sacred"? +s.value : s.value; store.set("cb",st.cb); recolor(); });
+  const on=(id,f)=>{ const n=P.querySelector("#"+id); if(n) n.onclick=f; };
+  on("cbReset",()=>{ st.cb={}; store.set("cb",{}); recolor(); renderPanel(); toast("Codebook reset"); });
+  on("cbCopy",()=>copy(JSON.stringify(st.cb,null,2)));
+  on("notesCopy",()=>copy(JSON.stringify({notes:st.notes,codebook:st.cb},null,2)));
+  on("resetPos",()=>{ st.pos={}; store.set("pos",{}); build(); toast("Boards back in place"); });
+  P.querySelectorAll("[data-note]").forEach(a=>a.onclick=e=>{ e.preventDefault(); const n=st.notes[+a.dataset.note]; fitRect(n.x-100,n.y-100,420,320); });
+}
+function copy(s){ const done=()=>toast("Copied to clipboard"); try{ navigator.clipboard.writeText(s).then(done,()=>fallback()); }catch(e){ fallback(); }
+  function fallback(){ const ta=document.createElement("textarea"); ta.value=s; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); done();}catch(e){ toast("Select the text and copy it manually"); } ta.remove(); } }
+function toast(m){ const t=document.createElement("div"); t.className="toast"; t.textContent=m; stage.appendChild(t); setTimeout(()=>t.remove(),1800); }
+
+/* ---------- notes ---------- */
+let dragN=null;
+function renderNotes(){ const box=$("#notes"); box.innerHTML="";
+  st.notes.forEach((n,i)=>{ const d=document.createElement("div"); d.className="note"; d.style.left=n.x+"px"; d.style.top=n.y+"px";
+    d.innerHTML=`<header><span>note ${i+1}</span><button aria-label="Delete note">×</button></header><div contenteditable="true" spellcheck="false"></div>`;
+    const ed=d.querySelector("[contenteditable]"); ed.textContent=n.text||"";
+    ed.addEventListener("input",()=>{ n.text=ed.textContent; store.set("notes",st.notes); });
+    ed.addEventListener("pointerdown",e=>e.stopPropagation());
+    d.querySelector("header button").onclick=()=>{ st.notes.splice(i,1); store.set("notes",st.notes); renderNotes(); if(st.tab==="notes") renderPanel(); };
+    d.querySelector("header").addEventListener("pointerdown",e=>{ if(e.target.tagName==="BUTTON") return; e.stopPropagation(); dragN={n,d,sx:e.clientX,sy:e.clientY,x:n.x,y:n.y}; });
+    box.appendChild(d); });
+}
+function moveNoteDrag(e){ const k=st.view.k; dragN.n.x=dragN.x+(e.clientX-dragN.sx)/k; dragN.n.y=dragN.y+(e.clientY-dragN.sy)/k; dragN.d.style.left=dragN.n.x+"px"; dragN.d.style.top=dragN.n.y+"px"; }
+function endNoteDrag(){ store.set("notes",st.notes); dragN=null; }
+function addNote(){ const r=stage.getBoundingClientRect(); const v=st.view; const x=(r.width/2-v.x)/v.k-110, y=(r.height/2-v.y)/v.k-50;
+  const sel=[...st.sel].map(t=>T(t).name).join(", "); st.notes.push({x,y,text: sel? sel+": " : ""}); store.set("notes",st.notes); renderNotes();
+  const eds=document.querySelectorAll(".note [contenteditable]"); const ed=eds[eds.length-1]; ed && ed.focus(); if(st.tab==="notes") renderPanel(); }
+
+/* ---------- goto ---------- */
+function fillGoto(){ const g=$("#goto"); const opts=[["all","Everything"],["plans","Plans row"],["stacks","Vertical row"],["graphs","Access graphs"],["consensus","Module consensus"],["overlay","Superimposed plans"],["vmatrix","Vertical matrix"],["sections","Sections"],["findings","Re-reading notes"]];
+  g.innerHTML=`<option value="">Board…</option>`+opts.map(([v,l])=>`<option value="${v}">${l}</option>`).join("")+HOUSES.map(h=>`<option value="house-${h.key}">${h.name} (all levels)</option>`).join("");
+  g.onchange=()=>{ const v=g.value; g.value=""; if(!v) return; goTo(v); }; }
+function goTo(v){ const pick=f=>boards.filter(f);
+  if(v==="all") return fitBoards(boards);
+  if(v==="plans") return fitBoards(pick(b=>b.id.startsWith("plan-")));
+  if(v==="stacks") return fitBoards(pick(b=>b.id.startsWith("stack-")));
+  if(v==="graphs") return fitBoards(pick(b=>b.id.startsWith("graph-")));
+  if(v.startsWith("house-")){ const k=v.slice(6); return fitBoards(pick(b=>b.id.endsWith("-"+k))); }
+  fitBoards(pick(b=>b.id===v)); }
+
+/* ---------- wiring ---------- */
+$("#zin").onclick=()=>{ const r=stage.getBoundingClientRect(); zoomAt(1.3,r.width/2,r.height/2); };
+$("#zout").onclick=()=>{ const r=stage.getBoundingClientRect(); zoomAt(1/1.3,r.width/2,r.height/2); };
+$("#zfit").onclick=()=>goTo("all");
+$("#isoBtn").onclick=()=>{ st.isolate=!st.isolate; renderSel(); };
+$("#clearBtn").onclick=clearSel;
+$("#noteBtn").onclick=addNote;
+$("#panelBtn").onclick=()=>togglePanel();
+$("#themeBtn").onclick=()=>{ const r=document.documentElement; const dark = r.dataset.theme ? r.dataset.theme==="dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme= dark?"light":"dark"; };
+["inspect","layers","code","notes"].forEach(k=>$("#tab-"+k).onclick=()=>setTab(k));
+window.addEventListener("keydown",e=>{ if(e.target.closest("[contenteditable],input,select,textarea")) return;
+  if(e.key==="Escape") clearSel(); if(e.key==="i"||e.key==="I"){ st.isolate=!st.isolate; renderSel(); } if(e.key==="n"||e.key==="N"){ e.preventDefault(); addNote(); } if(e.key==="f"||e.key==="F") goTo("all");
+  if(e.key==="+"||e.key==="=") $("#zin").click(); if(e.key==="-") $("#zout").click(); });
+window.addEventListener("resize",()=>{});
+
+renderLens(); build(); renderNotes(); togglePanel(st.panel); setTab("inspect");
+requestAnimationFrame(()=>goTo("plans"));
+</script>
